@@ -1,0 +1,41 @@
+# Java
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Maven
+/logs/
+*.log
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+/build/
+
+# Test
+/test-output/
+
+# Dependency directories
+/node_modules/
+
+# Others
+*.swp
+*.swo
+*.bak
+*.tmp

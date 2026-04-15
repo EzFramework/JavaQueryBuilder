@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+<suppressions>
+    <!-- Test classes: relax documentation and complexity rules -->
+    <suppress checks="JavadocMethod"                   files=".*Test\.java"/>
+    <suppress checks="JavadocType"                     files=".*Test\.java"/>
+    <suppress checks="JavadocVariable"                 files=".*Test\.java"/>
+    <suppress checks="SummaryJavadoc"                  files=".*Test\.java"/>
+    <suppress checks="MagicNumber"                     files=".*Test\.java"/>
+    <suppress checks="MethodLength"                    files=".*Test\.java"/>
+    <suppress checks="FinalLocalVariable"              files=".*Test\.java"/>
+    <suppress checks="VariableDeclarationUsageDistance" files=".*Test\.java"/>
+    <suppress checks="ClassFanOutComplexity"           files=".*Test\.java"/>
+</suppressions>
