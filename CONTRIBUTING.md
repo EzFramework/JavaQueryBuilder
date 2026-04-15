@@ -49,6 +49,11 @@ Run `mvn checkstyle:check` locally before pushing.
 3. Handle it in `AbstractSqlDialect` (and dialect subclasses if behaviour differs)
 4. Add tests for all three layers
 
+## Adding Tests
+
+- Add JUnit tests under `src/test/java/com/github/ezframework/javaquerybuilder/query/` and its subpackages.
+- Focus on covering all core features, edge cases, and error handling.
+
 ## Releasing
 
 Releases are published to **GitHub Packages** and available via **JitPack** automatically:

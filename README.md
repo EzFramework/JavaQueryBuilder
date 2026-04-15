@@ -2,9 +2,7 @@
 
 ![CI](https://github.com/EzFramework/JavaQueryBuilder/actions/workflows/ci.yml/badge.svg)
 
-This project uses GitHub Actions for continuous integration. See `.github/workflows/ci.yml` for details.
-
-A lightweight, fluent Java library for building SQL queries and filtering in-memory data — no runtime dependencies required.
+A lightweight, fluent Java library for building SQL queries and filtering in-memory data, no runtime dependencies required.
 
 ## Features
 
@@ -154,40 +152,6 @@ SQLite wraps every table and column name in double quotes, which safely handles 
 `LIKE` values are automatically wrapped with `%` on both sides so `whereLike("name", "alice")` becomes `name LIKE ?` with parameter `%alice%`.
 
 
-
-## Project Layout
-
-```
-src/main/java/com/skyblockexp/ezframework/query/
-├── QueryBuilder.java       Fluent builder — start here
-├── Query.java              Query data model; delegates rendering to SqlDialect
-├── SqlResult.java          Holds the generated SQL string and parameter list
-├── SqlDialect.java         Strategy interface (STANDARD / SQLITE constants)
-├── AbstractSqlDialect.java Shared rendering logic — extend to add new dialects
-├── StandardSqlDialect.java Standard SQL (no quoting)
-├── SqliteDialect.java      SQLite (double-quote identifiers, boolean → 0/1)
-├── Condition.java          Single field condition (operator + value)
-├── Operator.java           Enum of supported operators
-└── QueryableStorage.java   Interface for in-memory query execution
-```
-
 ## License
 
 MIT
-
-## Test Coverage
-
-This project uses [JaCoCo](https://www.jacoco.org/jacoco/) for test coverage analysis.
-
-### How to Generate Coverage Report
-
-1. Run all tests and generate the coverage report:
-   ```sh
-   mvn test jacoco:report
-   ```
-2. Open the HTML report:
-   - Open `target/site/jacoco/index.html` in your browser to view detailed coverage metrics.
-
-## Adding Tests
-- Add JUnit tests under `src/test/java/com/github/ezframework/javaquerybuilder/query/` and its subpackages.
-- Focus on covering all core features, edge cases, and error handling.
