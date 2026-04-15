@@ -28,7 +28,8 @@ jobs:
           name: java-query-builder-jar
           path: target/*.jar
       - name: Publish JUnit test results
-        uses: actions/upload-test-results@v2
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: (!cancelled())
         with:
           files: target/surefire-reports/*.xml
 
@@ -48,6 +49,7 @@ jobs:
       - name: Run feature tests
         run: mvn --batch-mode -Dtest='feature.**.*Test' test
       - name: Publish Feature Test Results
-        uses: actions/upload-test-results@v2
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: (!cancelled())
         with:
           files: target/surefire-reports/*.xml
