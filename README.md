@@ -1,7 +1,5 @@
 # JavaQueryBuilder
 
-![CI](https://github.com/EzFramework/JavaQueryBuilder/actions/workflows/ci.yml/badge.svg)
-
 A lightweight, fluent Java library for building SQL queries and filtering in-memory data, no runtime dependencies required.
 
 ## Features
