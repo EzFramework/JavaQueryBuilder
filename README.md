@@ -1,6 +1,6 @@
 # JavaQueryBuilder
 
-![CI](https://github.com/${{github.repository}}/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/EzFramework/JavaQueryBuilder/actions/workflows/ci.yml/badge.svg)
 
 This project uses GitHub Actions for continuous integration. See `.github/workflows/ci.yml` for details.
 
