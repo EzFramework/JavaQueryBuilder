@@ -1,4 +1,9 @@
 jdk:
   - openjdk25
 install:
+  - wget https://archive.apache.org/dist/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz
+  - tar xzf apache-maven-3.9.6-bin.tar.gz
+  - export MAVEN_HOME=$PWD/apache-maven-3.9.6
+  - export PATH=$MAVEN_HOME/bin:$PATH
+  - mvn --version
   - mvn install -DskipTests
