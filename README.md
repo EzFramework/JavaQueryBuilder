@@ -19,8 +19,19 @@ Add the dependency to your `pom.xml`:
 <dependency>
     <groupId>com.github.EzFramework</groupId>
     <artifactId>java-query-builder</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.2</version>
 </dependency>
+```
+
+Add the repository of Jitpack to your `pom.xml`:
+
+```xml
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
 ```
 
 ## Quick Start
