@@ -1,4 +1,9 @@
+
 name: Code Quality
+permissions:
+  checks: write
+  pull-requests: write
+  contents: read
 
 on:
   push:
