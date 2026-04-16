@@ -219,4 +219,89 @@ public class QueryBuilderTest {
     void buildSqlNoArgThrowsWhenNoTableSet() {
         assertThrows(IllegalStateException.class, () -> new QueryBuilder().buildSql());
     }
+
+    // --- Static factory: insert ---
+
+    @Test
+    void insertStaticFactoryBuildsCorrectSql() {
+        SqlResult result = QueryBuilder.insert().into("users").value("name", "Alice").build();
+        assertEquals("INSERT INTO users (name) VALUES (?)", result.getSql());
+        assertEquals(List.of("Alice"), result.getParameters());
+    }
+
+    @Test
+    void insertIntoShortcutBuildsCorrectSql() {
+        SqlResult result = QueryBuilder.insertInto("users").value("name", "Alice").value("age", 30).build();
+        assertEquals("INSERT INTO users (name, age) VALUES (?, ?)", result.getSql());
+        assertEquals(List.of("Alice", 30), result.getParameters());
+    }
+
+    // --- Static factory: delete ---
+
+    @Test
+    void deleteStaticFactoryBuildsCorrectSql() {
+        SqlResult result = QueryBuilder.delete().from("users").whereEquals("id", 1).build();
+        assertEquals("DELETE FROM users WHERE id = ?", result.getSql());
+        assertEquals(List.of(1), result.getParameters());
+    }
+
+    @Test
+    void deleteFromShortcutBuildsCorrectSql() {
+        SqlResult result = QueryBuilder.deleteFrom("users").whereEquals("id", 42).build();
+        assertEquals("DELETE FROM users WHERE id = ?", result.getSql());
+        assertEquals(List.of(42), result.getParameters());
+    }
+
+    @Test
+    void deleteFromShortcutNoConditions() {
+        SqlResult result = QueryBuilder.deleteFrom("sessions").build();
+        assertEquals("DELETE FROM sessions", result.getSql());
+        assertTrue(result.getParameters().isEmpty());
+    }
+
+    // --- Static factory: update ---
+
+    @Test
+    void updateStaticFactoryBuildsCorrectSql() {
+        SqlResult result = QueryBuilder.update().table("users").set("name", "Bob").whereEquals("id", 1).build();
+        assertTrue(result.getSql().startsWith("UPDATE users SET name = ?"));
+        assertTrue(result.getSql().contains("WHERE id = ?"));
+        assertEquals(List.of("Bob", 1), result.getParameters());
+    }
+
+    @Test
+    void updateShortcutBuildsCorrectSql() {
+        SqlResult result = QueryBuilder.update("users").set("status", "active").whereEquals("id", 5).build();
+        assertEquals("UPDATE users SET status = ? WHERE id = ?", result.getSql());
+        assertEquals(List.of("active", 5), result.getParameters());
+    }
+
+    // --- Static factory: createTable ---
+
+    @Test
+    void createTableStaticFactoryBuildsCorrectSql() {
+        SqlResult result = QueryBuilder.createTable().table("roles").column("id", "INT").build();
+        assertEquals("CREATE TABLE roles (id INT)", result.getSql());
+        assertTrue(result.getParameters().isEmpty());
+    }
+
+    @Test
+    void createTableShortcutBuildsCorrectSql() {
+        SqlResult result = QueryBuilder.createTable("users")
+                .column("id", "INT")
+                .column("name", "VARCHAR(255)")
+                .primaryKey("id")
+                .build();
+        assertEquals("CREATE TABLE users (id INT, name VARCHAR(255), PRIMARY KEY (id))", result.getSql());
+        assertTrue(result.getParameters().isEmpty());
+    }
+
+    @Test
+    void createTableShortcutWithIfNotExists() {
+        SqlResult result = QueryBuilder.createTable("sessions")
+                .column("token", "VARCHAR(64)")
+                .ifNotExists()
+                .build();
+        assertEquals("CREATE TABLE IF NOT EXISTS sessions (token VARCHAR(64))", result.getSql());
+    }
 }
