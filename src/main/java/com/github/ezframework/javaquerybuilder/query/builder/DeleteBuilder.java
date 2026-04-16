@@ -87,6 +87,77 @@ public class DeleteBuilder {
     }
 
     /**
+     * Adds a NOT IN WHERE condition.
+     * @param column the column name
+     * @param values the collection of values for the NOT IN clause
+     * @return this builder
+     * @throws IllegalArgumentException if values is null or empty
+     */
+    public DeleteBuilder whereNotIn(String column, List<?> values) {
+        if (values == null || values.isEmpty()) {
+            throw new IllegalArgumentException("NOT IN value list must not be null or empty");
+        }
+        conditions.add(new ConditionEntry(column, new Condition(Operator.NOT_IN, values), Connector.AND));
+        return this;
+    }
+
+    /**
+     * Adds a BETWEEN WHERE condition.
+     * @param column the column name
+     * @param from the lower bound value (inclusive)
+     * @param to the upper bound value (inclusive)
+     * @return this builder
+     */
+    public DeleteBuilder whereBetween(String column, Object from, Object to) {
+        conditions.add(new ConditionEntry(column, new Condition(Operator.BETWEEN, List.of(from, to)), Connector.AND));
+        return this;
+    }
+
+    /**
+     * Adds a greater-than WHERE condition.
+     * @param column the column name
+     * @param value the value to compare
+     * @return this builder
+     */
+    public DeleteBuilder whereGreaterThan(String column, Object value) {
+        conditions.add(new ConditionEntry(column, new Condition(Operator.GT, value), Connector.AND));
+        return this;
+    }
+
+    /**
+     * Adds a greater-than-or-equals WHERE condition.
+     * @param column the column name
+     * @param value the value to compare
+     * @return this builder
+     */
+    public DeleteBuilder whereGreaterThanOrEquals(String column, Object value) {
+        conditions.add(new ConditionEntry(column, new Condition(Operator.GTE, value), Connector.AND));
+        return this;
+    }
+
+    /**
+     * Adds a less-than-or-equals WHERE condition.
+     * @param column the column name
+     * @param value the value to compare
+     * @return this builder
+     */
+    public DeleteBuilder whereLessThanOrEquals(String column, Object value) {
+        conditions.add(new ConditionEntry(column, new Condition(Operator.LTE, value), Connector.AND));
+        return this;
+    }
+
+    /**
+     * Adds a not-equals WHERE condition.
+     * @param column the column name
+     * @param value the value to compare
+     * @return this builder
+     */
+    public DeleteBuilder whereNotEquals(String column, Object value) {
+        conditions.add(new ConditionEntry(column, new Condition(Operator.NEQ, value), Connector.AND));
+        return this;
+    }
+
+    /**
      * Builds the SQL DELETE statement.
      *
      * @return the SQL result
