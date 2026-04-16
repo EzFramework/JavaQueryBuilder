@@ -1,3 +1,4 @@
+// ...existing code...
 package com.github.ezframework.javaquerybuilder.query.builder;
 
 import java.util.List;
@@ -54,5 +55,12 @@ public class DeleteBuilderTest {
         SqlResult result = new DeleteBuilder().from("t").whereEquals("id", 1).build(SqlDialect.STANDARD);
         assertNotNull(result);
         assertTrue(result.getSql().startsWith("DELETE FROM t"));
+    }
+
+    @Test
+    void buildSqlInCondition() {
+        SqlResult result = new DeleteBuilder().from("users").whereIn("id", List.of(1, 2, 3)).build();
+        assertEquals("DELETE FROM users WHERE id IN (?, ?, ?)", result.getSql());
+        assertEquals(List.of(1, 2, 3), result.getParameters());
     }
 }

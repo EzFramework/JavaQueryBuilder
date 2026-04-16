@@ -80,6 +80,39 @@ open target/site/jacoco/index.html
 - Exception hierarchy: `QueryBuilderException` → `QueryException` / `QueryRenderException` in `query.exception`
 - Test class names match source class names with `Test` suffix and live in the same sub-package under `src/test/`
 
+## Agent Planning
+
+For multi-step tasks the agent maintains a visible todo list to track progress. Each item moves through three states: `not-started` → `in-progress` → `completed`. Only one item is in-progress at a time; it is marked completed immediately when done.
+
+**Typical workflow for a non-trivial request**:
+
+1. **Gather context** — read relevant source files and tests in parallel.
+2. **Plan** — break the work into concrete, ordered todos (e.g., add operator → update builder → write tests → verify build).
+3. **Execute** — work through todos one at a time, updating state as each finishes.
+4. **Validate** — run `mvn checkstyle:check` and `mvn test` after changes; fix any failures before marking the task complete.
+
+**When planning is skipped**: trivial, single-step requests (e.g., "what does `Operator.EQ` do?") do not need a todo list.
+
+**Communicating with the agent**: if you want the agent to change direction mid-task, just say so — it will update the plan and continue from the new state.
+
+## Agent Memory
+
+Copilot agents can persist project-scoped notes in `/memories/repo/` to carry context across sessions. Use this to record verified facts about the codebase so they don't need to be re-discovered.
+
+**Create a repo memory note** (only `create` is supported for this path):
+
+> "Remember that the `Query` class is immutable and built exclusively via the builder classes."
+
+The agent will store this under `/memories/repo/` and load it automatically in future sessions.
+
+**Useful things to store**:
+- Verified build commands and their quirks
+- Project-specific conventions not obvious from the code
+- Known gotchas (e.g., "always run `mvn checkstyle:check` before committing")
+- Architecture decisions and their rationale
+
+**Scope**: repo memory is local to this workspace and is never shared or published.
+
 ## Packaging and Distribution
 
 - **GitHub Packages**: published automatically on GitHub Release creation via [.github/workflows/publish.yml](.github/workflows/publish.yml)

@@ -1,5 +1,10 @@
 package com.github.ezframework.javaquerybuilder.query.builder;
 
+import com.github.ezframework.javaquerybuilder.query.builder.InsertBuilder;
+import com.github.ezframework.javaquerybuilder.query.builder.UpdateBuilder;
+import com.github.ezframework.javaquerybuilder.query.builder.DeleteBuilder;
+import com.github.ezframework.javaquerybuilder.query.builder.CreateBuilder;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +48,38 @@ public class QueryBuilder {
 
     /** The source table for SELECT. */
     private String table = null;
+
+    /**
+     * Creates a new InsertBuilder.
+     * @return a new InsertBuilder
+     */
+    public static InsertBuilder insert() {
+        return new InsertBuilder();
+    }
+
+    /**
+     * Creates a new UpdateBuilder.
+     * @return a new UpdateBuilder
+     */
+    public static UpdateBuilder update() {
+        return new UpdateBuilder();
+    }
+
+    /**
+     * Creates a new DeleteBuilder.
+     * @return a new DeleteBuilder
+     */
+    public static DeleteBuilder delete() {
+        return new DeleteBuilder();
+    }
+
+    /**
+     * Creates a new CreateBuilder for CREATE TABLE statements.
+     * @return a new CreateBuilder
+     */
+    public static CreateBuilder createTable() {
+        return new CreateBuilder();
+    }
 
     /**
      * Sets the source table for the SELECT query.
