@@ -9,7 +9,7 @@ A lightweight, fluent Java library for building SQL queries and filtering in-mem
 - Supports all common operators: `=`, `!=`, `>`, `<`, `LIKE`, `IN`, `BETWEEN`, `IS NOT NULL`
 - Column selection, `GROUP BY`, `ORDER BY`, `LIMIT`, and `OFFSET`
 - In-memory filtering via `QueryableStorage`
-- Zero runtime dependencies — pure Java 21
+- Zero runtime dependencies, pure Java 25
 
 ## Installation
 
@@ -19,7 +19,7 @@ Add the dependency to your `pom.xml`:
 <dependency>
     <groupId>com.github.EzFramework</groupId>
     <artifactId>java-query-builder</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
 </dependency>
 ```
 
