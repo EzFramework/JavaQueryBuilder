@@ -19,7 +19,7 @@ Add the dependency to your `pom.xml`:
 ```xml
 <dependency>
     <groupId>com.github.EzFramework</groupId>
-    <artifactId>java-query-builder</artifactId>
+    <artifactId>JavaQueryBuilder</artifactId>
     <version>1.0.3</version>
 </dependency>
 ```
