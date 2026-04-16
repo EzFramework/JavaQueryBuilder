@@ -2,9 +2,14 @@ package com.github.ezframework.javaquerybuilder.query.builder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.github.ezframework.javaquerybuilder.query.condition.Condition;
 import com.github.ezframework.javaquerybuilder.query.condition.ConditionEntry;
+import com.github.ezframework.javaquerybuilder.query.condition.Connector;
+import com.github.ezframework.javaquerybuilder.query.condition.Operator;
+import com.github.ezframework.javaquerybuilder.query.sql.SqlDialect;
+import com.github.ezframework.javaquerybuilder.query.sql.SqlResult;
 
 /**
  * Builder for SQL DELETE statements.
@@ -13,6 +18,16 @@ import com.github.ezframework.javaquerybuilder.query.condition.ConditionEntry;
  * @version 1.0.0
  */
 public class DeleteBuilder {
+
+    /** Simple comparison operators mapped to their SQL fragments. */
+    private static final Map<Operator, String> SIMPLE_OPS = Map.of(
+        Operator.EQ, " = ?",
+        Operator.NEQ, " != ?",
+        Operator.GT, " > ?",
+        Operator.GTE, " >= ?",
+        Operator.LT, " < ?",
+        Operator.LTE, " <= ?"
+    );
 
     /** The table to delete from. */
     private String table;
@@ -74,6 +89,32 @@ public class DeleteBuilder {
     /**
      * Builds the SQL DELETE statement.
      *
+     * @return the SQL result
+     */
+    public SqlResult build() {
+        return build(null);
+    }
+
+    /**
+     * Builds the SQL DELETE statement using the given dialect.
+     *
+     * @param dialect the SQL dialect (may be null for standard SQL)
+     * @return the SQL result
+     */
+    public SqlResult build(final SqlDialect dialect) {
+        final StringBuilder sql = new StringBuilder();
+        final List<Object> params = new ArrayList<>();
+        sql.append("DELETE FROM ").append(table);
+        if (!conditions.isEmpty()) {
+            sql.append(" WHERE ");
+            for (int j = 0; j < conditions.size(); j++) {
+                final ConditionEntry cond = conditions.get(j);
+                if (j > 0) {
+                    sql.append(" ").append(cond.getConnector().name()).append(" ");
+                }
+                appendDmlCondition(sql, params, cond);
+            }
+        }
         return new SqlResult() {
             @Override
             public String getSql() {
@@ -85,6 +126,24 @@ public class DeleteBuilder {
                 return params;
             }
         };
+    }
+
+    private void appendDmlCondition(StringBuilder sql, List<Object> params, ConditionEntry cond) {
+        final Operator op = cond.getCondition().getOperator();
+        sql.append(cond.getColumn());
+        if (SIMPLE_OPS.containsKey(op)) {
+            sql.append(SIMPLE_OPS.get(op));
+            params.add(cond.getCondition().getValue());
+        } else if (op == Operator.IN) {
+            handleInOperator(sql, params, cond);
+        } else if (op == Operator.NOT_IN) {
+            handleNotInOperator(sql, params, cond);
+        } else if (op == Operator.BETWEEN) {
+            handleBetweenOperator(sql, params, cond);
+        } else {
+            sql.append(" = ?");
+            params.add(cond.getCondition().getValue());
+        }
     }
 
     /**
@@ -113,14 +172,13 @@ public class DeleteBuilder {
     }
 
     /**
-    /**
-    * Handles the BETWEEN operator for SQL generation.
-    *
-    * @param sql the SQL string builder
-    * @param params the parameter list
-    * @param cond the condition entry
-    * @throws UnsupportedOperationException if the value list is null or not exactly two values
-    */
+     * Handles the BETWEEN operator for SQL generation.
+     *
+     * @param sql the SQL string builder
+     * @param params the parameter list
+     * @param cond the condition entry
+     * @throws UnsupportedOperationException if the value list is null or not exactly two values
+     */
     private void handleBetweenOperator(StringBuilder sql, List<Object> params, ConditionEntry cond) {
         @SuppressWarnings("unchecked")
         final List<?> betweenValues = (List<?>) cond.getCondition().getValue();

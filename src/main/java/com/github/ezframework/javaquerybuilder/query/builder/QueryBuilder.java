@@ -1,10 +1,5 @@
 package com.github.ezframework.javaquerybuilder.query.builder;
 
-import com.github.ezframework.javaquerybuilder.query.builder.InsertBuilder;
-import com.github.ezframework.javaquerybuilder.query.builder.UpdateBuilder;
-import com.github.ezframework.javaquerybuilder.query.builder.DeleteBuilder;
-import com.github.ezframework.javaquerybuilder.query.builder.CreateBuilder;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +12,30 @@ import com.github.ezframework.javaquerybuilder.query.condition.Operator;
 import com.github.ezframework.javaquerybuilder.query.sql.SqlDialect;
 import com.github.ezframework.javaquerybuilder.query.sql.SqlResult;
 
+/**
+ * Fluent builder for SQL SELECT queries and gateway to all other DML/DDL builders.
+ *
+ * <p>Use the static factory methods to obtain a builder for any SQL statement type:
+ * <pre>
+ *   // SELECT
+ *   QueryBuilder.from("users").whereEquals("id", 1).buildSql();
+ *
+ *   // INSERT
+ *   QueryBuilder.insertInto("users").value("name", "Alice").build();
+ *
+ *   // UPDATE
+ *   QueryBuilder.update("users").set("name", "Bob").whereEquals("id", 1).build();
+ *
+ *   // DELETE
+ *   QueryBuilder.deleteFrom("users").whereEquals("id", 1).build();
+ *
+ *   // CREATE TABLE
+ *   QueryBuilder.createTable("users").column("id", "INT").primaryKey("id").build();
+ * </pre>
+ *
+ * @author EzFramework
+ * @version 1.0.0
+ */
 public class QueryBuilder {
 
     /** The columns to select. */
@@ -50,7 +69,8 @@ public class QueryBuilder {
     private String table = null;
 
     /**
-     * Creates a new InsertBuilder.
+     * Returns a new {@link InsertBuilder}.
+     *
      * @return a new InsertBuilder
      */
     public static InsertBuilder insert() {
@@ -58,7 +78,18 @@ public class QueryBuilder {
     }
 
     /**
-     * Creates a new UpdateBuilder.
+     * Returns a new {@link InsertBuilder} pre-configured for the given table.
+     *
+     * @param table the table to insert into
+     * @return a new InsertBuilder targeting {@code table}
+     */
+    public static InsertBuilder insertInto(String table) {
+        return new InsertBuilder().into(table);
+    }
+
+    /**
+     * Returns a new {@link UpdateBuilder}.
+     *
      * @return a new UpdateBuilder
      */
     public static UpdateBuilder update() {
@@ -66,7 +97,18 @@ public class QueryBuilder {
     }
 
     /**
-     * Creates a new DeleteBuilder.
+     * Returns a new {@link UpdateBuilder} pre-configured for the given table.
+     *
+     * @param table the table to update
+     * @return a new UpdateBuilder targeting {@code table}
+     */
+    public static UpdateBuilder update(String table) {
+        return new UpdateBuilder().table(table);
+    }
+
+    /**
+     * Returns a new {@link DeleteBuilder}.
+     *
      * @return a new DeleteBuilder
      */
     public static DeleteBuilder delete() {
@@ -74,11 +116,32 @@ public class QueryBuilder {
     }
 
     /**
-     * Creates a new CreateBuilder for CREATE TABLE statements.
+     * Returns a new {@link DeleteBuilder} pre-configured for the given table.
+     *
+     * @param table the table to delete from
+     * @return a new DeleteBuilder targeting {@code table}
+     */
+    public static DeleteBuilder deleteFrom(String table) {
+        return new DeleteBuilder().from(table);
+    }
+
+    /**
+     * Returns a new {@link CreateBuilder} for DDL CREATE TABLE statements.
+     *
      * @return a new CreateBuilder
      */
     public static CreateBuilder createTable() {
         return new CreateBuilder();
+    }
+
+    /**
+     * Returns a new {@link CreateBuilder} pre-configured for the given table name.
+     *
+     * @param table the table to create
+     * @return a new CreateBuilder targeting {@code table}
+     */
+    public static CreateBuilder createTable(String table) {
+        return new CreateBuilder().table(table);
     }
 
     /**
@@ -92,16 +155,34 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Specifies the columns to include in the SELECT clause.
+     *
+     * @param columns one or more column names to select
+     * @return this builder instance for chaining
+     */
     public QueryBuilder select(String... columns) {
         selectColumns.addAll(Arrays.asList(columns));
         return this;
     }
 
+    /**
+     * Adds {@code DISTINCT} to the SELECT clause.
+     *
+     * @return this builder instance for chaining
+     */
     public QueryBuilder distinct() {
         isDistinct = true;
         return this;
     }
 
+    /**
+     * Adds an equality ({@code =}) WHERE condition joined with AND.
+     *
+     * @param column the column name
+     * @param value  the value to compare against
+     * @return this builder instance for chaining
+     */
     public QueryBuilder whereEquals(String column, Object value) {
         conditions.add(
             new ConditionEntry(
@@ -113,6 +194,13 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds an equality ({@code =}) WHERE condition joined with OR.
+     *
+     * @param column the column name
+     * @param value  the value to compare against
+     * @return this builder instance for chaining
+     */
     public QueryBuilder orWhereEquals(String column, Object value) {
         conditions.add(
             new ConditionEntry(
@@ -124,6 +212,13 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds a {@code LIKE} WHERE condition joined with AND.
+     *
+     * @param column the column name
+     * @param value  the LIKE pattern
+     * @return this builder instance for chaining
+     */
     public QueryBuilder whereLike(String column, String value) {
         conditions.add(
             new ConditionEntry(
@@ -135,6 +230,13 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds a {@code NOT LIKE} WHERE condition joined with AND.
+     *
+     * @param column the column name
+     * @param value  the LIKE pattern
+     * @return this builder instance for chaining
+     */
     public QueryBuilder whereNotLike(String column, String value) {
         conditions.add(
             new ConditionEntry(
@@ -146,6 +248,12 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds an {@code EXISTS} WHERE condition joined with AND.
+     *
+     * @param column the column name
+     * @return this builder instance for chaining
+     */
     public QueryBuilder whereExists(String column) {
         conditions.add(
             new ConditionEntry(
@@ -157,6 +265,12 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds an {@code IS NULL} WHERE condition joined with AND.
+     *
+     * @param column the column name
+     * @return this builder instance for chaining
+     */
     public QueryBuilder whereNull(String column) {
         conditions.add(
             new ConditionEntry(
@@ -168,6 +282,12 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds an {@code IS NOT NULL} WHERE condition joined with AND.
+     *
+     * @param column the column name
+     * @return this builder instance for chaining
+     */
     public QueryBuilder whereNotNull(String column) {
         conditions.add(
             new ConditionEntry(
@@ -179,6 +299,13 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds an {@code IN} WHERE condition joined with AND.
+     *
+     * @param column the column name
+     * @param values the list of values
+     * @return this builder instance for chaining
+     */
     public QueryBuilder whereIn(String column, List<?> values) {
         conditions.add(
             new ConditionEntry(
@@ -190,6 +317,13 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds a {@code NOT IN} WHERE condition joined with AND.
+     *
+     * @param column the column name
+     * @param values the list of values
+     * @return this builder instance for chaining
+     */
     public QueryBuilder whereNotIn(String column, List<?> values) {
         conditions.add(
             new ConditionEntry(
@@ -201,6 +335,14 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds a {@code BETWEEN} WHERE condition joined with AND.
+     *
+     * @param column the column name
+     * @param a      the lower bound (inclusive)
+     * @param b      the upper bound (inclusive)
+     * @return this builder instance for chaining
+     */
     public QueryBuilder whereBetween(String column, Object a, Object b) {
         conditions.add(
             new ConditionEntry(
@@ -212,6 +354,13 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds a greater-than ({@code >}) WHERE condition joined with AND.
+     *
+     * @param column the column name
+     * @param value  the value to compare against
+     * @return this builder instance for chaining
+     */
     public QueryBuilder whereGreaterThan(String column, Object value) {
         conditions.add(
             new ConditionEntry(
@@ -223,6 +372,13 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds a greater-than-or-equal ({@code >=}) WHERE condition joined with AND.
+     *
+     * @param column the column name
+     * @param value  the value to compare against
+     * @return this builder instance for chaining
+     */
     public QueryBuilder whereGreaterThanOrEquals(String column, Object value) {
         conditions.add(
             new ConditionEntry(
@@ -234,6 +390,13 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds a less-than-or-equal ({@code <=}) WHERE condition joined with AND.
+     *
+     * @param column the column name
+     * @param value  the value to compare against
+     * @return this builder instance for chaining
+     */
     public QueryBuilder whereLessThanOrEquals(String column, Object value) {
         conditions.add(
             new ConditionEntry(
@@ -245,32 +408,68 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds one or more columns to the GROUP BY clause.
+     *
+     * @param columns the column names
+     * @return this builder instance for chaining
+     */
     public QueryBuilder groupBy(String... columns) {
         groupByColumns.addAll(Arrays.asList(columns));
         return this;
     }
 
+    /**
+     * Adds a column to the ORDER BY clause.
+     *
+     * @param column the column name
+     * @param asc    {@code true} for ascending, {@code false} for descending
+     * @return this builder instance for chaining
+     */
     public QueryBuilder orderBy(String column, boolean asc) {
         orderByColumns.add(column);
         orderByAsc.add(asc);
         return this;
     }
 
+    /**
+     * Sets the row limit.
+     *
+     * @param limit the maximum number of rows to return
+     * @return this builder instance for chaining
+     */
     public QueryBuilder limit(int limit) {
         this.limit = limit;
         return this;
     }
 
+    /**
+     * Sets the row offset.
+     *
+     * @param offset the number of rows to skip
+     * @return this builder instance for chaining
+     */
     public QueryBuilder offset(int offset) {
         this.offset = offset;
         return this;
     }
 
+    /**
+     * Sets a raw HAVING clause.
+     *
+     * @param clause the raw SQL HAVING clause (e.g. {@code "COUNT(*) > 5"})
+     * @return this builder instance for chaining
+     */
     public QueryBuilder havingRaw(String clause) {
         this.havingRaw = clause;
         return this;
     }
 
+    /**
+     * Builds a {@link Query} object from the current builder state.
+     *
+     * @return an immutable {@link Query} representing the SELECT statement
+     */
     public Query build() {
         final Query q = new Query();
         q.setLimit(limit);

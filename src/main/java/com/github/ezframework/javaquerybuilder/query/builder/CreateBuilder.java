@@ -10,19 +10,22 @@ import com.github.ezframework.javaquerybuilder.query.sql.SqlResult;
 
 /**
  * Builder for SQL CREATE TABLE statements.
-    /**
-     * Builds the SQL CREATE TABLE statement with a dialect.
-     * @param dialect the SQL dialect (optional)
-     * @return the SQL result
-     * @throws IllegalStateException if table or columns are missing
-     */
-    public SqlResult build(SqlDialect dialect) {
+ *
+ * @author EzFramework
+ * @version 1.0.0
+ */
+public class CreateBuilder {
+
+    /** The table to create. */
     private String table;
+
     /** The columns and their SQL types. */
     private final Map<String, String> columns = new LinkedHashMap<>();
+
     /** The primary key columns. */
     private final List<String> primaryKeys = new ArrayList<>();
-    /** If true, adds IF NOT EXISTS. */
+
+    /** Whether to add IF NOT EXISTS. */
     private boolean ifNotExists = false;
 
     /**
@@ -67,22 +70,22 @@ import com.github.ezframework.javaquerybuilder.query.sql.SqlResult;
 
     /**
      * Builds the SQL CREATE TABLE statement.
+     *
      * @return the SQL result
-     * @throws IllegalStateException if table or columns are missing
+     * @throws IllegalStateException if table name or columns are missing
      */
-    
     public SqlResult build() {
         return build(null);
     }
 
     /**
-     * Builds the SQL CREATE TABLE statement with a dialect.
-     * @param dialect the SQL dialect (optional)
+     * Builds the SQL CREATE TABLE statement using the given dialect.
+     *
+     * @param dialect the SQL dialect to use; if {@code null}, the standard dialect is used
      * @return the SQL result
-     * @throws IllegalStateException if table or columns are missing
-    
+     * @throws IllegalStateException if table name or columns are missing
+     */
     public SqlResult build(SqlDialect dialect) {
-        
         if (table == null || columns.isEmpty()) {
             throw new IllegalStateException("Table name and at least one column are required");
         }
@@ -112,6 +115,7 @@ import com.github.ezframework.javaquerybuilder.query.sql.SqlResult;
             public String getSql() {
                 return sql.toString();
             }
+
             @Override
             public List<Object> getParameters() {
                 return List.of();
