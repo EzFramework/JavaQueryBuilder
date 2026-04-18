@@ -1,5 +1,9 @@
 # JavaQueryBuilder
 
+[![JitPack](https://jitpack.io/v/EzFramework/JavaQueryBuilder.svg)](https://jitpack.io/#EzFramework/JavaQueryBuilder)
+[![GitHub Packages](https://img.shields.io/github/v/release/EzFramework/JavaQueryBuilder?label=GitHub%20Packages&logo=github)](https://github.com/EzFramework/JavaQueryBuilder/packages)
+[![codecov](https://codecov.io/gh/EzFramework/JavaQueryBuilder/branch/main/graph/badge.svg)](https://codecov.io/gh/EzFramework/JavaQueryBuilder)
+
 A lightweight, fluent Java library for building parameterized SQL queries and filtering in-memory data, no runtime dependencies required.
 
 ## Features

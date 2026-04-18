@@ -1,0 +1,260 @@
+---
+title: Query Builder
+nav_order: 3
+description: "Building SELECT queries with the fluent QueryBuilder API"
+---
+
+# Query Builder
+{: .no_toc }
+
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
+
+## Overview
+
+`QueryBuilder` is the main entry point for SELECT queries. Its fluent API lets
+you compose any SELECT statement by chaining method calls and then calling
+`build()` (returns a `Query` object) or `buildSql()` (returns a `SqlResult`
+ready for execution).
+
+```java
+import com.github.ezframework.javaquerybuilder.query.builder.QueryBuilder;
+import com.github.ezframework.javaquerybuilder.query.sql.SqlDialect;
+import com.github.ezframework.javaquerybuilder.query.sql.SqlResult;
+
+SqlResult result = new QueryBuilder()
+    .from("users")
+    .select("id", "name", "email")
+    .whereEquals("status", "active")
+    .orderBy("name", true)
+    .limit(50)
+    .buildSql(SqlDialect.MYSQL);
+
+String sql     = result.getSql();
+List<?> params = result.getParameters();
+```
+
+`QueryBuilder` is also the gateway to all DML builders via its static factory
+methods — see [DML Builders](dml-builders).
+
+---
+
+## Setting the table
+
+```java
+new QueryBuilder().from("orders")
+```
+
+---
+
+## Selecting columns
+
+```java
+// SELECT * (default — no columns specified)
+new QueryBuilder().from("users")
+
+// SELECT id, name
+new QueryBuilder().from("users").select("id", "name")
+
+// DISTINCT
+new QueryBuilder().from("users").distinct().select("country")
+```
+
+---
+
+## Filtering with `where*`
+
+All `where*` methods are joined with `AND` by default. Use the `orWhere*`
+variants to join with `OR`.
+
+```java
+// WHERE status = 'active'
+.whereEquals("status", "active")
+
+// WHERE status != 'banned'
+.whereNotEquals("status", "banned")
+
+// WHERE age > 18
+.whereGreaterThan("age", 18)
+
+// WHERE age >= 18
+.whereGreaterThanOrEquals("age", 18)
+
+// WHERE price < 100
+.whereLessThan("price", 100)
+
+// WHERE price <= 100
+.whereLessThanOrEquals("price", 100)
+
+// WHERE name LIKE '%Alice%'
+.whereLike("name", "Alice")
+
+// WHERE name NOT LIKE '%bot%'
+.whereNotLike("name", "bot")
+
+// WHERE deleted_at IS NULL
+.whereNull("deleted_at")
+
+// WHERE verified_at IS NOT NULL
+.whereNotNull("verified_at")
+
+// WHERE country IS NOT NULL  (alias for whereNotNull)
+.whereExists("country")
+
+// WHERE status IN ('active', 'pending')
+.whereIn("status", List.of("active", "pending"))
+
+// WHERE status NOT IN ('banned', 'deleted')
+.whereNotIn("status", List.of("banned", "deleted"))
+
+// WHERE price BETWEEN 10 AND 99
+.whereBetween("price", 10, 99)
+```
+
+### OR conditions
+
+Every `where*` method has an `orWhere*` counterpart:
+
+```java
+new QueryBuilder()
+    .from("users")
+    .whereEquals("role", "admin")
+    .orWhereEquals("role", "moderator")
+// → WHERE role = ? OR role = ?
+```
+
+---
+
+## Ordering
+
+```java
+// ORDER BY name ASC
+.orderBy("name", true)
+
+// ORDER BY created_at DESC
+.orderBy("created_at", false)
+
+// Multiple columns: ORDER BY level DESC, name ASC
+.orderBy("level", false)
+.orderBy("name", true)
+```
+
+---
+
+## Grouping
+
+```java
+// GROUP BY country
+.groupBy("country")
+
+// GROUP BY country, city
+.groupBy("country", "city")
+```
+
+### HAVING
+
+Pass a raw SQL fragment — no value interpolation; use static expressions only:
+
+```java
+.groupBy("category")
+.havingRaw("COUNT(*) > 5")
+```
+
+{: .warning }
+> `havingRaw` accepts a raw SQL string. Never pass user-supplied input here.
+> Use only static, known-safe expressions.
+
+---
+
+## LIMIT and OFFSET
+
+```java
+// First 20 rows
+.limit(20)
+
+// Rows 41–60 (page 3 of 20)
+.limit(20).offset(40)
+```
+
+---
+
+## Building the result
+
+### `build()` — returns a `Query`
+
+`build()` produces a `Query` object which can be passed to a `SqlDialect` later,
+used for in-memory filtering with `QueryableStorage`, or inspected directly:
+
+```java
+Query q = new QueryBuilder()
+    .from("products")
+    .whereGreaterThan("stock", 0)
+    .build();
+```
+
+### `buildSql()` — returns a `SqlResult`
+
+`buildSql()` renders the `Query` immediately using the standard ANSI dialect.
+Use the overloads to specify a table or dialect explicitly:
+
+```java
+// Uses table set via from(), standard dialect
+SqlResult r1 = builder.buildSql();
+
+// Explicit table, standard dialect
+SqlResult r2 = builder.buildSql("orders");
+
+// Explicit table and dialect
+SqlResult r3 = builder.buildSql("orders", SqlDialect.MYSQL);
+```
+
+See [SQL Dialects](sql-dialects) for the dialect options and the rendered
+identifier differences.
+
+---
+
+## Subquery methods
+
+`QueryBuilder` also exposes methods for embedding subqueries:
+
+| Method | What it adds |
+|--------|-------------|
+| `whereInSubquery(col, subquery)` | `WHERE col IN (SELECT ...)` |
+| `whereEqualsSubquery(col, subquery)` | `WHERE col = (SELECT ...)` |
+| `whereExistsSubquery(subquery)` | `WHERE EXISTS (SELECT ...)` |
+| `whereNotExistsSubquery(subquery)` | `WHERE NOT EXISTS (SELECT ...)` |
+| `fromSubquery(subquery, alias)` | `FROM (SELECT ...) AS alias` |
+| `joinSubquery(subquery, alias, on)` | `INNER JOIN (SELECT ...) AS alias ON ...` |
+| `selectSubquery(subquery, alias)` | `(SELECT ...) AS alias` in SELECT clause |
+
+See [Subqueries](subqueries) for full examples.
+
+---
+
+## Security
+
+Every value passed to a `where*` method is placed in the `?` bind-parameter
+list of the rendered `SqlResult` — it is never concatenated into the SQL string.
+
+```java
+// Safe even if userInput contains SQL metacharacters
+String userInput = "'; DROP TABLE users; --";
+
+SqlResult r = new QueryBuilder()
+    .from("users")
+    .whereEquals("name", userInput)
+    .buildSql();
+
+// r.getSql()        → "SELECT * FROM users WHERE name = ?"
+// r.getParameters() → ["'; DROP TABLE users; --"]
+```
+
+{: .warning }
+> Column names and table names are **not** parameterized. Always use static,
+> known-safe strings for those arguments — never forward user input as a
+> column or table name.
