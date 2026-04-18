@@ -20,7 +20,7 @@ Add the dependency to your `pom.xml`:
 <dependency>
     <groupId>com.github.EzFramework</groupId>
     <artifactId>JavaQueryBuilder</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
 </dependency>
 ```
 
@@ -321,13 +321,38 @@ SqlResult result = new QueryBuilder()
 // → SELECT * FROM "users" WHERE "status" = ?
 ```
 
-| Dialect | Identifier quoting | Boolean values |
-|---|---|---|
-| `SqlDialect.STANDARD` | none | `true` / `false` |
-| `SqlDialect.MYSQL` | back-ticks `` `col` `` | `true` / `false` |
-| `SqlDialect.SQLITE` | double quotes `"col"` | `1` / `0` |
+| Dialect | Identifier quoting | Boolean values | DELETE LIMIT |
+|---|---|---|---|
+| `SqlDialect.STANDARD` | none | `true` / `false` | no |
+| `SqlDialect.MYSQL` | back-ticks `` `col` `` | `true` / `false` | yes |
+| `SqlDialect.SQLITE` | double quotes `"col"` | `1` / `0` | yes |
 
 MySQL back-tick quoting safely handles reserved words and case-sensitive identifiers. SQLite double-quote quoting serves the same purpose, and Java booleans are converted to `1`/`0` to match SQLite's integer-backed boolean storage.
+
+### Dialect-aware DELETE rendering
+
+Every `SqlDialect` exposes a `renderDelete(Query query)` method that generates a fully dialect-aware `DELETE FROM ... WHERE ...` statement, identifier quoting and all. MySQL and SQLite also append a `LIMIT` clause when one is set on the query; the standard dialect silently ignores it.
+
+```java
+// Obtain a Query from any QueryBuilder call
+Query query = new QueryBuilder()
+    .from("users")
+    .whereEquals("id", 42)
+    .limit(1)
+    .build();
+
+// Standard — no quoting, no LIMIT
+SqlDialect.STANDARD.renderDelete(query);
+// → DELETE FROM users WHERE id = ?   params=[42]
+
+// MySQL — back-tick quoting + LIMIT
+SqlDialect.MYSQL.renderDelete(query);
+// → DELETE FROM `users` WHERE `id` = ? LIMIT 1   params=[42]
+
+// SQLite — double-quote quoting + LIMIT
+SqlDialect.SQLITE.renderDelete(query);
+// → DELETE FROM "users" WHERE "id" = ? LIMIT 1   params=[42]
+```
 
 ## How SQL Generation Works
 
