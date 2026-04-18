@@ -247,7 +247,7 @@ getters and setters; setters are used exclusively by the builders.
 |--------|-------------|
 | `JoinClause(Type, String table, String on)` | Plain-table join |
 | `JoinClause(Type, Query subquery, String alias, String on)` | Subquery (derived-table) join |
-| `getType()` | `JoinClause.Type`: `INNER`, `LEFT`, `RIGHT`, or `CROSS` | Join type |
+| `getType()` | `JoinClause.Type`: `INNER`, `LEFT`, `RIGHT`, or `CROSS` |
 | `getTable()` | Table name for plain-table join; `null` for subquery join |
 | `getSubquery()` | Subquery for derived-table join; `null` for plain-table join |
 | `getAlias()` | Alias for derived-table join |
