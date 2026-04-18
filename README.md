@@ -6,6 +6,7 @@
 
 A lightweight, fluent Java library for building parameterized SQL queries and filtering in-memory data, no runtime dependencies required.
 
+
 ## Features
 
 - Fluent, readable builder API for SELECT, INSERT, UPDATE, DELETE, and CREATE TABLE
@@ -14,6 +15,7 @@ A lightweight, fluent Java library for building parameterized SQL queries and fi
 - Subquery support: `WHERE col IN (SELECT ...)`, `WHERE EXISTS (SELECT ...)`, `WHERE NOT EXISTS`, derived-table `FROM (SELECT ...) AS alias`, JOIN subqueries, and scalar `(SELECT ...) AS alias` in SELECT
 - Column selection, `DISTINCT`, `GROUP BY`, `ORDER BY`, `LIMIT`, and `OFFSET`
 - SQL dialect support: Standard, MySQL, SQLite
+- **Global and per-query configuration of defaults (e.g., dialect, columns, limit, LIKE wrapping) via `QueryBuilderDefaults`**
 - In-memory filtering via `QueryableStorage`
 - Zero runtime dependencies, pure Java 21+
 
@@ -390,6 +392,48 @@ new SelectBuilder()
     .offset(20)
     .build();                              // → SqlResult
 ```
+
+
+## Global and Per-Query Configuration
+
+You can preset the default SQL dialect, default columns, limit, offset, and LIKE wrapping for all queries using `QueryBuilderDefaults`. This is useful for enforcing a project-wide dialect (e.g., always use SQLite) or customizing builder defaults.
+
+### Set SQLite as the default dialect for all queries
+
+```java
+import com.github.ezframework.javaquerybuilder.query.QueryBuilderDefaults;
+import com.github.ezframework.javaquerybuilder.query.sql.SqlDialect;
+
+// Set at application startup:
+QueryBuilderDefaults.setGlobal(
+    QueryBuilderDefaults.builder()
+        .dialect(SqlDialect.SQLITE)
+        .build()
+);
+
+// All new QueryBuilder, SelectBuilder, and DeleteBuilder instances will use SQLite quoting by default:
+SqlResult result = new QueryBuilder()
+    .select("id", "name")
+    .from("users")
+    .buildSql();
+// → SELECT id, name FROM "users"
+```
+
+### Override per query
+
+You can override the defaults for a single query using `.withDefaults()`:
+
+```java
+SqlResult result = new QueryBuilder()
+    .withDefaults(QueryBuilderDefaults.builder(QueryBuilderDefaults.global())
+        .dialect(SqlDialect.MYSQL)
+        .build())
+    .from("users")
+    .buildSql();
+// → SELECT * FROM `users`
+```
+
+See the Javadoc for [`QueryBuilderDefaults`](src/main/java/com/github/ezframework/javaquerybuilder/query/QueryBuilderDefaults.java) for all configurable options.
 
 ## SQL Dialects
 

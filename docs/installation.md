@@ -110,7 +110,7 @@ authenticate with a personal access token that has `read:packages` scope.
 
 ## Verifying the installation
 
-Add this snippet to a test class — it should compile and run without errors:
+Add this snippet to a test class. It should compile and run without errors:
 
 ```java
 import com.github.ezframework.javaquerybuilder.query.builder.QueryBuilder;

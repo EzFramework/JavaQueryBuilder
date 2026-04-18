@@ -19,20 +19,22 @@ No runtime dependencies required.
 
 ## Features
 
-- **Fluent SELECT builder** — `from`, `select`, `distinct`, `where*`,
+- **Fluent SELECT builder**: `from`, `select`, `distinct`, `where*`,
   `orderBy`, `groupBy`, `havingRaw`, `limit`, `offset`
-- **DML builders** — `InsertBuilder`, `UpdateBuilder`, `DeleteBuilder`, `CreateBuilder`
-- **Parameterized-only** — user values always go through `?` bind parameters; SQL injection
+- **DML builders**: `InsertBuilder`, `UpdateBuilder`, `DeleteBuilder`, `CreateBuilder`
+- **Parameterized-only**: user values always go through `?` bind parameters; SQL injection
   is structurally impossible
-- **16 operators** — equality, comparison, `LIKE`, `NULL` checks, `IN`, `BETWEEN`,
+- **16 operators**: equality, comparison, `LIKE`, `NULL` checks, `IN`, `BETWEEN`,
   `EXISTS`, and subquery operators
-- **Subquery support** — `WHERE col IN (SELECT ...)`, `WHERE EXISTS (SELECT ...)`,
+- **Subquery support**: `WHERE col IN (SELECT ...)`, `WHERE EXISTS (SELECT ...)`,
   `WHERE NOT EXISTS (SELECT ...)`, scalar `WHERE col = (SELECT ...)`,
   FROM-derived table, JOIN subquery, and scalar `SELECT` items
-- **Three SQL dialects** — `STANDARD` (ANSI), `MYSQL` (back-tick quoting), `SQLITE` (double-quote)
-- **In-memory filtering** — `QueryableStorage` functional interface applies the same `Query`
+- **Three SQL dialects**: `STANDARD` (ANSI), `MYSQL` (back-tick quoting), `SQLITE` (double-quote)
+- **Global and per-query configuration** via `QueryBuilderDefaults`: preset dialect, default
+  columns, limit, offset, and LIKE wrapping once at application startup
+- **In-memory filtering**: `QueryableStorage` functional interface applies the same `Query`
   to flat-map collections without touching a database
-- **Zero runtime dependencies** — pure Java 25+, nothing to shade or exclude
+- **Zero runtime dependencies**: pure Java 25+, nothing to shade or exclude
 
 ---
 
@@ -100,11 +102,12 @@ SqlResult update = QueryBuilder.update("users")
 | Page | What it covers |
 |------|----------------|
 | [Installation](installation) | Maven, Gradle, JitPack, GitHub Packages |
-| [Query Builder](query-builder) | SELECT — `from`, `select`, `where*`, `orderBy`, `build` |
+| [Query Builder](query-builder) | SELECT: `from`, `select`, `where*`, `orderBy`, `build` |
 | [DML Builders](dml-builders) | `InsertBuilder`, `UpdateBuilder`, `DeleteBuilder`, `CreateBuilder` |
 | [Conditions](conditions) | All 16 operators, `Condition`, `ConditionEntry`, `Connector` |
 | [Subqueries](subqueries) | All six subquery variants |
 | [SQL Dialects](sql-dialects) | `STANDARD`, `MYSQL`, `SQLITE`, `SqlResult`, dialect matrix |
-| [In-Memory Filtering](in-memory) | `QueryableStorage` — filter collections without a database |
+| [Configuration](configuration) | `QueryBuilderDefaults`: global and per-query dialect, columns, limit, LIKE wrapping |
+| [In-Memory Filtering](in-memory) | `QueryableStorage`: filter collections without a database |
 | [Exceptions](exceptions) | Error hierarchy and handling patterns |
 | [API Reference](api-reference) | Full public-method tables for every class |

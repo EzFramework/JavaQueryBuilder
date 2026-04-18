@@ -1,6 +1,6 @@
 ---
 title: In-Memory Filtering
-nav_order: 8
+nav_order: 9
 description: "Filtering in-memory collections with QueryableStorage"
 ---
 
@@ -38,7 +38,7 @@ caller controls how records are loaded by ID after filtering.
 
 Each `ConditionEntry` in the `Query` holds a `Condition` with an `Operator` and
 a value. `Condition.matches(Map<String, Object>, String key)` evaluates the
-condition against an attribute map — no SQL dialect or database connection is
+condition against an attribute map. No SQL dialect or database connection is
 required.
 
 The `QueryableStorage` implementation is responsible for:
@@ -153,7 +153,7 @@ List<String> ids = store.query(q);
 | `EQ` | `Objects.equals(stored, value)` |
 | `NEQ` | `!Objects.equals(stored, value)` |
 | `GT` / `GTE` / `LT` / `LTE` | Numeric comparison; coerces `Long`/`Integer`/`Double` as needed |
-| `LIKE` | `stored.toString().contains(value)` — substring match |
+| `LIKE` | `stored.toString().contains(value)` (substring match) |
 | `NOT_LIKE` | Negated `LIKE` |
 | `IS_NULL` | `!map.containsKey(key) \|\| map.get(key) == null` |
 | `IS_NOT_NULL` / `EXISTS` | `map.containsKey(key) && map.get(key) != null` |

@@ -40,7 +40,7 @@ List<?> params = result.getParameters();
 ```
 
 `QueryBuilder` is also the gateway to all DML builders via its static factory
-methods — see [DML Builders](dml-builders).
+methods. See [DML Builders](dml-builders).
 
 ---
 
@@ -55,7 +55,7 @@ new QueryBuilder().from("orders")
 ## Selecting columns
 
 ```java
-// SELECT * (default — no columns specified)
+// SELECT * (default - no columns specified)
 new QueryBuilder().from("users")
 
 // SELECT id, name
@@ -158,7 +158,7 @@ new QueryBuilder()
 
 ### HAVING
 
-Pass a raw SQL fragment — no value interpolation; use static expressions only:
+Pass a raw SQL fragment with no value interpolation. Use static expressions only:
 
 ```java
 .groupBy("category")
@@ -185,7 +185,7 @@ Pass a raw SQL fragment — no value interpolation; use static expressions only:
 
 ## Building the result
 
-### `build()` — returns a `Query`
+### `build()` (returns a `Query`)
 
 `build()` produces a `Query` object which can be passed to a `SqlDialect` later,
 used for in-memory filtering with `QueryableStorage`, or inspected directly:
@@ -197,7 +197,7 @@ Query q = new QueryBuilder()
     .build();
 ```
 
-### `buildSql()` — returns a `SqlResult`
+### `buildSql()` (returns a `SqlResult`)
 
 `buildSql()` renders the `Query` immediately using the standard ANSI dialect.
 Use the overloads to specify a table or dialect explicitly:
@@ -239,7 +239,7 @@ See [Subqueries](subqueries) for full examples.
 ## Security
 
 Every value passed to a `where*` method is placed in the `?` bind-parameter
-list of the rendered `SqlResult` — it is never concatenated into the SQL string.
+list of the rendered `SqlResult`. It is never concatenated into the SQL string.
 
 ```java
 // Safe even if userInput contains SQL metacharacters
@@ -256,5 +256,5 @@ SqlResult r = new QueryBuilder()
 
 {: .warning }
 > Column names and table names are **not** parameterized. Always use static,
-> known-safe strings for those arguments — never forward user input as a
+> known-safe strings for those arguments. Never forward user input as a
 > column or table name.
