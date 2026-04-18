@@ -17,7 +17,7 @@ description: "Operators, Condition, ConditionEntry, Connector AND/OR, and the or
 
 ## Overview
 
-Every `where*` call on a builder creates a `ConditionEntry` — a triple of:
+Every `where*` call on a builder creates a `ConditionEntry` with three properties:
 
 - a **column name** (or `null` for EXISTS subquery conditions)
 - a **`Condition`** (operator + value)
@@ -84,7 +84,7 @@ constant and the SQL it generates.
 
 ## AND vs OR connector
 
-### Default — AND
+### Default behavior (AND)
 
 All `where*` methods use `AND`:
 
@@ -96,7 +96,7 @@ new QueryBuilder()
 // → WHERE role = ? AND active = ?
 ```
 
-### OR — use the `orWhere*` variant
+### OR conditions
 
 ```java
 new QueryBuilder()

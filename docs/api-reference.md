@@ -1,6 +1,6 @@
 ---
 title: API Reference
-nav_order: 10
+nav_order: 11
 description: "Complete public method tables for every class and interface in JavaQueryBuilder"
 ---
 
@@ -70,8 +70,10 @@ Main entry point for SELECT queries and static gateway to DML builders.
 | `offset(int n)` | `QueryBuilder` | Set `OFFSET` |
 | `build()` | `Query` | Build a `Query` object (no SQL rendered yet) |
 | `buildSql()` | `SqlResult` | Render SELECT using table set via `from()`, standard dialect |
+| `buildSql(SqlDialect)` | `SqlResult` | Render SELECT using table set via `from()`, specified dialect |
 | `buildSql(String table)` | `SqlResult` | Render SELECT for explicit `table`, standard dialect |
 | `buildSql(String table, SqlDialect)` | `SqlResult` | Render SELECT for explicit `table` and dialect |
+| `withDefaults(QueryBuilderDefaults)` | `QueryBuilder` | Set per-instance configuration defaults; throws `NullPointerException` if `null` |
 
 ---
 
@@ -91,6 +93,8 @@ Lower-level SELECT builder that produces `SqlResult` directly (no `Query` interm
 | `orderBy(String col, boolean asc)` | `SelectBuilder` | Add `ORDER BY` |
 | `limit(int n)` | `SelectBuilder` | Set `LIMIT` |
 | `offset(int n)` | `SelectBuilder` | Set `OFFSET` |
+| `withDefaults(QueryBuilderDefaults)` | `SelectBuilder` | Set per-instance configuration defaults; throws `NullPointerException` if `null` |
+| `build()` | `SqlResult` | Render SELECT using defaults dialect |
 | `build(SqlDialect)` | `SqlResult` | Render SELECT with given dialect |
 
 ---
@@ -134,6 +138,7 @@ Lower-level SELECT builder that produces `SqlResult` directly (no `Query` interm
 | `whereIn(col, List<?>)` | `DeleteBuilder` | `WHERE col IN (...)` (AND); throws `IllegalArgumentException` if list is null/empty |
 | `whereNotIn(col, List<?>)` | `DeleteBuilder` | `WHERE col NOT IN (...)` (AND); throws `IllegalArgumentException` if list is null/empty |
 | `whereBetween(col, from, to)` | `DeleteBuilder` | `WHERE col BETWEEN ? AND ?` (AND) |
+| `withDefaults(QueryBuilderDefaults)` | `DeleteBuilder` | Set per-instance configuration defaults; throws `NullPointerException` if `null` |
 | `build()` | `SqlResult` | Render with standard dialect |
 | `build(SqlDialect)` | `SqlResult` | Render with specified dialect |
 
@@ -242,7 +247,7 @@ getters and setters; setters are used exclusively by the builders.
 |--------|-------------|
 | `JoinClause(Type, String table, String on)` | Plain-table join |
 | `JoinClause(Type, Query subquery, String alias, String on)` | Subquery (derived-table) join |
-| `getType()` | `JoinClause.Type` — `INNER`, `LEFT`, `RIGHT`, or `CROSS` |
+| `getType()` | `JoinClause.Type`: `INNER`, `LEFT`, `RIGHT`, or `CROSS` |
 | `getTable()` | Table name for plain-table join; `null` for subquery join |
 | `getSubquery()` | Subquery for derived-table join; `null` for plain-table join |
 | `getAlias()` | Alias for derived-table join |
@@ -279,9 +284,9 @@ public interface QueryableStorage {
 
 | Member | Description |
 |--------|-------------|
-| `STANDARD` | ANSI SQL — no identifier quoting |
-| `MYSQL` | MySQL — back-tick quoting; DELETE LIMIT supported |
-| `SQLITE` | SQLite — double-quote quoting; DELETE LIMIT supported |
+| `STANDARD` | ANSI SQL (no identifier quoting) |
+| `MYSQL` | MySQL: back-tick quoting; DELETE LIMIT supported |
+| `SQLITE` | SQLite: double-quote quoting; DELETE LIMIT supported |
 | `render(Query)` | Render a SELECT query to `SqlResult` |
 | `renderDelete(Query)` | Render a DELETE query to `SqlResult` |
 
@@ -293,6 +298,49 @@ public interface QueryableStorage {
 |--------|---------|-------------|
 | `getSql()` | `String` | Rendered SQL with `?` placeholders |
 | `getParameters()` | `List<Object>` | Bind parameters in placeholder order |
+
+---
+
+## configuration
+
+### `QueryBuilderDefaults`
+
+Immutable configuration object. See [Configuration](configuration) for a full
+usage guide.
+
+**Static methods**
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `global()` | `QueryBuilderDefaults` | Current JVM-wide defaults instance |
+| `setGlobal(defaults)` | `void` | Replace the JVM-wide defaults; throws `NullPointerException` if `null` |
+| `builder()` | `Builder` | New builder pre-filled with canonical defaults |
+| `builder(source)` | `Builder` | New builder copied from `source`; throws `NullPointerException` if `null` |
+
+**Instance getters**
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `getDialect()` | `SqlDialect` | Configured SQL dialect |
+| `getDefaultColumns()` | `String` | Default SELECT column expression |
+| `getDefaultLimit()` | `int` | Default LIMIT; `-1` means none |
+| `getDefaultOffset()` | `int` | Default OFFSET; `-1` means none |
+| `getLikePrefix()` | `String` | Prefix for LIKE values |
+| `getLikeSuffix()` | `String` | Suffix for LIKE values |
+
+---
+
+### `QueryBuilderDefaults.Builder`
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `dialect(SqlDialect)` | `Builder` | Set dialect; throws `NullPointerException` if `null` |
+| `defaultColumns(String)` | `Builder` | Set default SELECT columns; throws `NullPointerException` if `null` |
+| `defaultLimit(int)` | `Builder` | Set default LIMIT; pass `-1` to disable |
+| `defaultOffset(int)` | `Builder` | Set default OFFSET; pass `-1` to disable |
+| `likePrefix(String)` | `Builder` | Set LIKE prefix; throws `NullPointerException` if `null` |
+| `likeSuffix(String)` | `Builder` | Set LIKE suffix; throws `NullPointerException` if `null` |
+| `build()` | `QueryBuilderDefaults` | Build the immutable configuration object |
 
 ---
 

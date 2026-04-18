@@ -1,7 +1,7 @@
 ---
 title: Subqueries
 nav_order: 6
-description: "All six subquery variants — IN, EXISTS, NOT EXISTS, scalar, FROM-derived table, JOIN, and scalar SELECT"
+description: "All six subquery variants: IN, EXISTS, NOT EXISTS, scalar, FROM-derived table, JOIN, and scalar SELECT"
 ---
 
 # Subqueries

@@ -1,6 +1,6 @@
 ---
 title: Exceptions
-nav_order: 9
+nav_order: 10
 description: "Exception hierarchy, when each exception is thrown, and handling patterns"
 ---
 
@@ -19,13 +19,13 @@ description: "Exception hierarchy, when each exception is thrown, and handling p
 
 The library defines three standalone checked exceptions in the
 `com.github.ezframework.javaquerybuilder.query.exception` package.
-None extends the others — each signals a distinct failure mode.
+None extends the others; each signals a distinct failure mode.
 
 ```text
 Exception
-  ├── QueryBuilderException  — general builder or configuration error
-  ├── QueryException         — query-level runtime error
-  └── QueryRenderException   — SQL rendering error
+  ├── QueryBuilderException  : general builder or configuration error
+  ├── QueryException         : query-level runtime error
+  └── QueryRenderException   : SQL rendering error
 ```
 
 All three share the same four constructor signatures.
@@ -57,7 +57,7 @@ try {
 
 ## QueryException
 
-Thrown for runtime errors at the query level — for example, when a
+Thrown for runtime errors at the query level, for example when a
 `QueryableStorage` implementation encounters an error during in-memory
 evaluation.
 
@@ -82,7 +82,7 @@ try {
 
 ## QueryRenderException
 
-Thrown when a `Query` cannot be rendered to SQL — for example, if required
+Thrown when a `Query` cannot be rendered to SQL, for example if required
 fields are missing or the query state is inconsistent at render time.
 
 ```java
@@ -114,7 +114,7 @@ try {
     List<String> ids = store.query(q);
 }
 catch (QueryRenderException e) {
-    // Rendering failed — log and return a safe error response
+    // Rendering failed, log and return a safe error response
 }
 catch (QueryException e) {
     // In-memory evaluation failed
@@ -130,12 +130,12 @@ Exception messages may contain internal column names or values. Map exceptions
 to safe, generic responses before returning them to external clients.
 
 ```java
-// CORRECT — map to a safe API response
+// CORRECT: map to a safe API response
 catch (QueryRenderException e) {
     return Response.serverError().entity("Query rendering error").build();
 }
 
-// WRONG — leaks internal details
+// WRONG: leaks internal details
 catch (QueryRenderException e) {
     return Response.serverError().entity(e.getMessage()).build();
 }

@@ -41,14 +41,14 @@ SqlResult r1 = new QueryBuilder()
     .buildSql();
 // → SELECT * FROM users WHERE id = ?
 
-// MySQL — identifiers back-tick quoted
+// MySQL: back-tick quoted identifiers
 SqlResult r2 = new QueryBuilder()
     .from("users")
     .whereEquals("id", 1)
     .buildSql(SqlDialect.MYSQL);
 // → SELECT * FROM `users` WHERE `id` = ?
 
-// SQLite — identifiers double-quoted
+// SQLite: double-quoted identifiers
 SqlResult r3 = new QueryBuilder()
     .from("users")
     .whereEquals("id", 1)
@@ -96,15 +96,15 @@ Query q = new QueryBuilder()
     .limit(500)
     .build();
 
-// Standard — LIMIT ignored
+// Standard: LIMIT ignored
 SqlResult std = SqlDialect.STANDARD.renderDelete(q);
 // → DELETE FROM sessions WHERE expired = ?
 
-// MySQL — LIMIT honored
+// MySQL: LIMIT honored
 SqlResult my = SqlDialect.MYSQL.renderDelete(q);
 // → DELETE FROM `sessions` WHERE `expired` = ? LIMIT 500
 
-// SQLite — LIMIT honored
+// SQLite: LIMIT honored
 SqlResult sq = SqlDialect.SQLITE.renderDelete(q);
 // → DELETE FROM "sessions" WHERE "expired" = ? LIMIT 500
 ```
@@ -129,7 +129,7 @@ The same `Query` produces different SQL across dialects due to identifier quotin
 `AbstractSqlDialect` implements the shared rendering logic for SELECT and DELETE
 queries. It is the base class for both `MySqlDialect` and `SqliteDialect`.
 
-**Subquery parameter ordering** — parameters are collected depth-first in this
+**Subquery parameter ordering**: parameters are collected depth-first in this
 order:
 
 1. SELECT-list scalar subquery parameters (left to right)
