@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.github.ezframework.javaquerybuilder.query.Query;
+import com.github.ezframework.javaquerybuilder.query.QueryBuilderDefaults;
 import com.github.ezframework.javaquerybuilder.query.condition.Condition;
 import com.github.ezframework.javaquerybuilder.query.condition.ConditionEntry;
 import com.github.ezframework.javaquerybuilder.query.condition.Connector;
@@ -24,6 +25,24 @@ public class DeleteBuilder {
 
     /** The WHERE conditions. */
     private final List<ConditionEntry> conditions = new ArrayList<>();
+
+    /** The defaults configuration for this builder instance. */
+    private QueryBuilderDefaults queryBuilderDefaults = QueryBuilderDefaults.global();
+
+    /**
+     * Overrides the defaults configuration for this builder instance.
+     *
+     * @param defaults the defaults to apply; must not be {@code null}
+     * @return this builder instance for chaining
+     * @throws NullPointerException if {@code defaults} is {@code null}
+     */
+    public DeleteBuilder withDefaults(final QueryBuilderDefaults defaults) {
+        if (defaults == null) {
+            throw new NullPointerException("QueryBuilderDefaults must not be null");
+        }
+        this.queryBuilderDefaults = defaults;
+        return this;
+    }
 
     /**
      * Sets the table to delete from.
@@ -182,14 +201,15 @@ public class DeleteBuilder {
 
     /**
      * Builds the SQL DELETE statement using the given dialect.
-     * When {@code dialect} is {@code null}, {@link SqlDialect#STANDARD} is used.
+     * When {@code dialect} is {@code null}, the dialect from the configured
+     * {@link QueryBuilderDefaults} is used.
      *
-     * @param dialect the SQL dialect (may be null for standard SQL)
+     * @param dialect the SQL dialect (may be {@code null} to use the configured default)
      * @return the SQL result
      */
     public SqlResult build(final SqlDialect dialect) {
         final Query q = toQuery();
-        return (dialect != null ? dialect : SqlDialect.STANDARD).renderDelete(q);
+        return (dialect != null ? dialect : queryBuilderDefaults.getDialect()).renderDelete(q);
     }
 
     private Query toQuery() {
