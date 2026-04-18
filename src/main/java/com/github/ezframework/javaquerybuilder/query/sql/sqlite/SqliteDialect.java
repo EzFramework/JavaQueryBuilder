@@ -17,4 +17,9 @@ public class SqliteDialect extends AbstractSqlDialect {
     protected String quoteIdentifier(String name) {
         return "\"" + name + "\"";
     }
+
+    @Override
+    protected boolean supportsDeleteLimit() {
+        return true;
+    }
 }
