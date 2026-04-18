@@ -141,7 +141,7 @@ public class AbstractSqlDialect implements SqlDialect {
         final List<String> cols = query.getSelectColumns();
         final List<ScalarSelectItem> subItems = query.getSelectSubqueries();
         if (cols.isEmpty() && subItems.isEmpty()) {
-            sql.append("*");
+            sql.append(query.getDefaultSelectColumns());
             return;
         }
         final List<String> fragments = new ArrayList<>();
@@ -207,7 +207,7 @@ public class AbstractSqlDialect implements SqlDialect {
             if (entry.getColumn() != null) {
                 sql.append(quoteIdentifier(entry.getColumn())).append(" ");
             }
-            appendConditionFragment(sql, params, entry);
+            appendConditionFragment(sql, params, entry, query);
         }
     }
 
@@ -219,9 +219,11 @@ public class AbstractSqlDialect implements SqlDialect {
      * @param sql    the SQL string builder
      * @param params the bound-parameter list
      * @param entry  the condition entry to render
+     * @param query  the source query (used for LIKE wrapping configuration)
      */
     @SuppressWarnings("unchecked")
-    protected void appendConditionFragment(StringBuilder sql, List<Object> params, ConditionEntry entry) {
+    protected void appendConditionFragment(
+            StringBuilder sql, List<Object> params, ConditionEntry entry, Query query) {
         final Operator op = entry.getCondition().getOperator();
         final Object val = entry.getCondition().getValue();
 
@@ -234,7 +236,7 @@ public class AbstractSqlDialect implements SqlDialect {
             params.add(val);
             return;
         }
-        appendNonComparisonFragment(sql, params, op, val);
+        appendNonComparisonFragment(sql, params, op, val, query);
     }
 
     private void appendSubqueryCondition(
@@ -284,15 +286,15 @@ public class AbstractSqlDialect implements SqlDialect {
 
     @SuppressWarnings("unchecked")
     private void appendNonComparisonFragment(
-            StringBuilder sql, List<Object> params, Operator op, Object val) {
+            StringBuilder sql, List<Object> params, Operator op, Object val, Query query) {
         switch (op) {
             case LIKE:
                 sql.append("LIKE ?");
-                params.add("%" + val + "%");
+                params.add(query.getLikePrefix() + val + query.getLikeSuffix());
                 break;
             case NOT_LIKE:
                 sql.append("NOT LIKE ?");
-                params.add("%" + val + "%");
+                params.add(query.getLikePrefix() + val + query.getLikeSuffix());
                 break;
             case EXISTS:
                 sql.append("IS NOT NULL");
