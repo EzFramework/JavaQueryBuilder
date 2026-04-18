@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.github.ezframework.javaquerybuilder.query.JoinClause;
 import com.github.ezframework.javaquerybuilder.query.Query;
+import com.github.ezframework.javaquerybuilder.query.QueryBuilderDefaults;
 import com.github.ezframework.javaquerybuilder.query.ScalarSelectItem;
 import com.github.ezframework.javaquerybuilder.query.condition.Condition;
 import com.github.ezframework.javaquerybuilder.query.condition.ConditionEntry;
@@ -81,6 +82,27 @@ public class QueryBuilder {
 
     /** The scalar subquery items appended to the SELECT clause. */
     private final List<ScalarSelectItem> selectSubqueries = new ArrayList<>();
+
+    /** The defaults configuration for this builder instance. */
+    private QueryBuilderDefaults queryBuilderDefaults = QueryBuilderDefaults.global();
+
+    /**
+     * Overrides the defaults configuration for this builder instance.
+     *
+     * <p>The change applies only to this instance; the JVM-wide global is not
+     * modified. Calling this method after construction is safe and fluent.
+     *
+     * @param defaults the defaults to apply; must not be {@code null}
+     * @return this builder instance for chaining
+     * @throws NullPointerException if {@code defaults} is {@code null}
+     */
+    public QueryBuilder withDefaults(final QueryBuilderDefaults defaults) {
+        if (defaults == null) {
+            throw new NullPointerException("QueryBuilderDefaults must not be null");
+        }
+        this.queryBuilderDefaults = defaults;
+        return this;
+    }
 
     /**
      * Returns a new {@link InsertBuilder}.
@@ -576,8 +598,6 @@ public class QueryBuilder {
      */
     public Query build() {
         final Query q = new Query();
-        q.setLimit(limit);
-        q.setOffset(offset);
         q.setConditions(new ArrayList<>(conditions));
         q.setGroupBy(new ArrayList<>(groupByColumns));
         q.setOrderBy(new ArrayList<>(orderByColumns));
@@ -590,6 +610,15 @@ public class QueryBuilder {
         q.setFromAlias(fromAlias);
         q.setJoins(new ArrayList<>(joins));
         q.setSelectSubqueries(new ArrayList<>(selectSubqueries));
+        q.setDefaultSelectColumns(queryBuilderDefaults.getDefaultColumns());
+        q.setLikePrefix(queryBuilderDefaults.getLikePrefix());
+        q.setLikeSuffix(queryBuilderDefaults.getLikeSuffix());
+        final int resolvedLimit = (limit == -1 && queryBuilderDefaults.getDefaultLimit() >= 0)
+            ? queryBuilderDefaults.getDefaultLimit() : limit;
+        final int resolvedOffset = (offset == -1 && queryBuilderDefaults.getDefaultOffset() >= 0)
+            ? queryBuilderDefaults.getDefaultOffset() : offset;
+        q.setLimit(resolvedLimit);
+        q.setOffset(resolvedOffset);
         return q;
     }
 
@@ -626,6 +655,6 @@ public class QueryBuilder {
     public SqlResult buildSql(String table, SqlDialect dialect) {
         final Query q = build();
         q.setTable(table);
-        return (dialect != null ? dialect : SqlDialect.STANDARD).render(q);
+        return (dialect != null ? dialect : queryBuilderDefaults.getDialect()).render(q);
     }
 }

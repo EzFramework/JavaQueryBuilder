@@ -67,7 +67,7 @@ class SelectBuilderTest {
     void testWhereLike() {
         SqlResult sql = new SelectBuilder()
                 .from("users")
-                .whereLike("name", "%bob%")
+                .whereLike("name", "bob")
                 .build();
         assertEquals("SELECT * FROM users WHERE name LIKE ?", sql.getSql());
         assertEquals(Collections.singletonList("%bob%"), sql.getParameters());
