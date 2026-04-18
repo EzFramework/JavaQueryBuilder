@@ -33,4 +33,17 @@ public interface SqlDialect {
      * @return the SQL result containing the SQL string and bound parameters
      */
     SqlResult render(Query query);
+
+    /**
+     * Renders a DELETE statement for the given query (DELETE FROM ... WHERE ...).
+     *
+     * @param query the query describing the delete target and conditions
+        * @return the SQL result containing the SQL string and bound parameters
+        *
+        * <p>Default behaviour is implemented by {@link AbstractSqlDialect#renderDelete(Query)},
+        * which renders {@code DELETE FROM <table> WHERE ...} and preserves parameter
+        * ordering to match {@link #render(Query)}. Dialects that support a DELETE
+        * {@code LIMIT} may enable it by overriding {@link AbstractSqlDialect#supportsDeleteLimit()}.
+     */
+    SqlResult renderDelete(Query query);
 }

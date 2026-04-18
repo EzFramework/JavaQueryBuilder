@@ -11,10 +11,13 @@ import com.github.ezframework.javaquerybuilder.query.condition.ConditionEntry;
 import com.github.ezframework.javaquerybuilder.query.condition.Operator;
 
 /**
- * Base SQL rendering logic for SELECT queries.
+ * Base SQL rendering logic for SELECT and DELETE queries.
  *
- * <p>Implements the standard (ANSI) SQL dialect. Subclasses may override
- * {@link #quoteIdentifier(String)} to apply dialect-specific identifier quoting.
+ * <p>Implements the standard (ANSI) SQL dialect and provides shared helpers for
+ * rendering {@code WHERE} clauses. Subclasses may override
+ * {@link #quoteIdentifier(String)} to apply dialect-specific identifier quoting
+ * and {@link #supportsDeleteLimit()} to enable dialect-specific DELETE
+ * {@code LIMIT} behaviour.
  *
  * @author EzFramework
  * @version 1.0.0
@@ -42,6 +45,44 @@ public class AbstractSqlDialect implements SqlDialect {
      */
     protected String quoteIdentifier(String name) {
         return name;
+    }
+
+    @Override
+    public SqlResult renderDelete(Query query) {
+        final StringBuilder sql = new StringBuilder();
+        final List<Object> params = new ArrayList<>();
+        sql.append("DELETE FROM ").append(quoteIdentifier(query.getTable()));
+        appendWhereClause(sql, params, query);
+
+        if (supportsDeleteLimit() && query.getLimit() != null && query.getLimit() >= 0) {
+            sql.append(" LIMIT ").append(query.getLimit());
+        }
+
+        final String sqlStr = sql.toString();
+        final List<Object> paramsCopy = Collections.unmodifiableList(new ArrayList<>(params));
+        return new SqlResult() {
+            @Override
+            public String getSql() {
+                return sqlStr;
+            }
+
+            @Override
+            public List<Object> getParameters() {
+                return paramsCopy;
+            }
+        };
+    }
+
+    /**
+     * Hook for dialects that support a `LIMIT` clause on DELETE statements
+     * (for example, MySQL). The default implementation returns {@code false},
+     * meaning the base renderer will ignore `limit` on `Query` for DELETE.
+     * Subclasses that want to enable `LIMIT` should override this method.
+     *
+     * @return {@code true} if the dialect appends a `LIMIT` to DELETE statements
+     */
+    protected boolean supportsDeleteLimit() {
+        return false;
     }
 
     @Override
@@ -94,7 +135,7 @@ public class AbstractSqlDialect implements SqlDialect {
         }
     }
 
-    private void appendWhereClause(StringBuilder sql, List<Object> params, Query query) {
+    protected void appendWhereClause(StringBuilder sql, List<Object> params, Query query) {
         final List<ConditionEntry> conditions = query.getConditions();
         if (conditions.isEmpty()) {
             return;
@@ -111,7 +152,7 @@ public class AbstractSqlDialect implements SqlDialect {
     }
 
     @SuppressWarnings("unchecked")
-    private void appendConditionFragment(StringBuilder sql, List<Object> params, ConditionEntry entry) {
+    protected void appendConditionFragment(StringBuilder sql, List<Object> params, ConditionEntry entry) {
         final Operator op = entry.getCondition().getOperator();
         if (COMPARISON_OPERATORS.containsKey(op)) {
             sql.append(COMPARISON_OPERATORS.get(op));
