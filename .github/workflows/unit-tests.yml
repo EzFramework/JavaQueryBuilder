@@ -1,8 +1,6 @@
 name: Unit Tests
 
 permissions:
-  checks: write
-  pull-requests: write
   contents: read
 
 on:
@@ -32,11 +30,6 @@ jobs:
         with:
           name: java-query-builder-jar
           path: target/*.jar
-      - name: Publish JUnit test results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: (!cancelled())
-        with:
-          files: target/surefire-reports/*.xml
 
   feature-tests:
     runs-on: ubuntu-latest
@@ -53,8 +46,3 @@ jobs:
           java-version: ${{ matrix.java-version }}
       - name: Run feature tests
         run: mvn --batch-mode -Dtest='feature.**.*Test' test
-      - name: Publish Feature Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: (!cancelled())
-        with:
-          files: target/surefire-reports/*.xml

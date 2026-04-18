@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.github.ezframework.javaquerybuilder.query.QueryBuilderDefaults;
 import com.github.ezframework.javaquerybuilder.query.condition.Condition;
 import com.github.ezframework.javaquerybuilder.query.condition.ConditionEntry;
 import com.github.ezframework.javaquerybuilder.query.condition.Connector;
@@ -62,6 +63,24 @@ public class SelectBuilder {
      * Whether to use DISTINCT.
      */
     private boolean distinct = false;
+
+    /** The defaults configuration for this builder instance. */
+    private QueryBuilderDefaults queryBuilderDefaults = QueryBuilderDefaults.global();
+
+    /**
+     * Overrides the defaults configuration for this builder instance.
+     *
+     * @param defaults the defaults to apply; must not be {@code null}
+     * @return this builder instance for chaining
+     * @throws NullPointerException if {@code defaults} is {@code null}
+     */
+    public SelectBuilder withDefaults(final QueryBuilderDefaults defaults) {
+        if (defaults == null) {
+            throw new NullPointerException("QueryBuilderDefaults must not be null");
+        }
+        this.queryBuilderDefaults = defaults;
+        return this;
+    }
 
     /**
      * Sets the table to select from.
@@ -223,7 +242,7 @@ public class SelectBuilder {
             sql.append("DISTINCT ");
         }
         if (columns.isEmpty()) {
-            sql.append("*");
+            sql.append(queryBuilderDefaults.getDefaultColumns());
         } else {
             sql.append(String.join(", ", columns));
         }
@@ -261,7 +280,10 @@ public class SelectBuilder {
                 sql.append(")");
             } else if (op == Operator.LIKE) {
                 sql.append("LIKE ?");
-                params.add(cond.getCondition().getValue());
+                final String likeVal = queryBuilderDefaults.getLikePrefix()
+                    + cond.getCondition().getValue()
+                    + queryBuilderDefaults.getLikeSuffix();
+                params.add(likeVal);
             } else {
                 throw new UnsupportedOperationException(
                         "Operator not supported: " + cond.getCondition().getOperator());
@@ -288,11 +310,15 @@ public class SelectBuilder {
     }
 
     private void buildLimitOffsetClause(final StringBuilder sql) {
-        if (limit >= 0) {
-            sql.append(" LIMIT ").append(limit);
+        final int resolvedLimit = (limit == -1 && queryBuilderDefaults.getDefaultLimit() >= 0)
+            ? queryBuilderDefaults.getDefaultLimit() : limit;
+        final int resolvedOffset = (offset == -1 && queryBuilderDefaults.getDefaultOffset() >= 0)
+            ? queryBuilderDefaults.getDefaultOffset() : offset;
+        if (resolvedLimit >= 0) {
+            sql.append(" LIMIT ").append(resolvedLimit);
         }
-        if (offset >= 0) {
-            sql.append(" OFFSET ").append(offset);
+        if (resolvedOffset >= 0) {
+            sql.append(" OFFSET ").append(resolvedOffset);
         }
     }
 }
