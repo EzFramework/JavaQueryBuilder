@@ -7,6 +7,7 @@ A lightweight, fluent Java library for building parameterized SQL queries and fi
 - Fluent, readable builder API for SELECT, INSERT, UPDATE, DELETE, and CREATE TABLE
 - All values are parameterized, safe from SQL injection by design
 - Supports all common operators: `=`, `!=`, `>`, `>=`, `<`, `<=`, `LIKE`, `NOT LIKE`, `IN`, `NOT IN`, `BETWEEN`, `IS NULL`, `IS NOT NULL`
+- Subquery support: `WHERE col IN (SELECT ...)`, `WHERE EXISTS (SELECT ...)`, `WHERE NOT EXISTS`, derived-table `FROM (SELECT ...) AS alias`, JOIN subqueries, and scalar `(SELECT ...) AS alias` in SELECT
 - Column selection, `DISTINCT`, `GROUP BY`, `ORDER BY`, `LIMIT`, and `OFFSET`
 - SQL dialect support: Standard, MySQL, SQLite
 - In-memory filtering via `QueryableStorage`
@@ -120,6 +121,81 @@ SqlResult result = QueryBuilder.createTable("users")
 // sql → "CREATE TABLE IF NOT EXISTS users (id INT, name VARCHAR(255), email VARCHAR(255), PRIMARY KEY (id))"
 ```
 
+### Subqueries
+
+Every subquery is a `Query` object built with `QueryBuilder`. Pass it to the relevant builder method — parameters are collected automatically in document order.
+
+#### WHERE IN subquery
+
+```java
+Query shipped = new QueryBuilder()
+    .select("user_id").from("orders").whereEquals("status", "shipped").build();
+
+SqlResult result = new QueryBuilder()
+    .from("users").whereInSubquery("id", shipped).buildSql("users");
+
+// sql    → SELECT * FROM users WHERE id IN (SELECT user_id FROM orders WHERE status = ?)
+// params → ["shipped"]
+```
+
+#### WHERE EXISTS / NOT EXISTS
+
+```java
+Query pending = new QueryBuilder()
+    .select("id").from("orders").whereEquals("status", "pending").build();
+
+new QueryBuilder().from("users").whereExistsSubquery(pending).buildSql("users");
+// → SELECT * FROM users WHERE EXISTS (SELECT id FROM orders WHERE status = ?)
+
+new QueryBuilder().from("users").whereNotExistsSubquery(pending).buildSql("users");
+// → SELECT * FROM users WHERE NOT EXISTS (SELECT id FROM orders WHERE status = ?)
+```
+
+#### WHERE col = (scalar subquery)
+
+```java
+Query latestId = new QueryBuilder()
+    .select("id").from("orders").whereEquals("status", "shipped").limit(1).build();
+
+new QueryBuilder().from("users").whereEqualsSubquery("id", latestId).buildSql("users");
+// → SELECT * FROM users WHERE id = (SELECT id FROM orders WHERE status = ? LIMIT 1)
+```
+
+#### FROM subquery (derived table)
+
+```java
+Query inner = new QueryBuilder().select("id", "name").from("users").build();
+
+SqlResult result = new QueryBuilder()
+    .select("name").fromSubquery(inner, "u").buildSql(null);
+// → SELECT name FROM (SELECT id, name FROM users) AS u
+```
+
+#### JOIN subquery
+
+```java
+Query totals = new QueryBuilder().select("user_id", "amount").from("orders").build();
+
+SqlResult result = new QueryBuilder()
+    .from("users")
+    .joinSubquery(totals, "o", "users.id = o.user_id")
+    .buildSql("users");
+// → SELECT * FROM users INNER JOIN (SELECT user_id, amount FROM orders) AS o ON users.id = o.user_id
+```
+
+#### Scalar SELECT subquery
+
+```java
+Query latest = new QueryBuilder()
+    .select("amount").from("orders").whereEquals("user_id", 1).limit(1).build();
+
+SqlResult result = new QueryBuilder()
+    .select("id", "name").selectSubquery(latest, "last_order")
+    .from("users").buildSql("users");
+// → SELECT id, name, (SELECT amount FROM orders WHERE user_id = ? LIMIT 1) AS last_order FROM users
+// params → [1]
+```
+
 ### In-Memory Filtering
 
 Implement `QueryableStorage` on your storage class to enable query-based lookups without a database:
@@ -145,10 +221,10 @@ public class UserStore implements QueryableStorage {
 |---|---|---|
 | `whereEquals(col, val)` | `col = ?` | QueryBuilder, DeleteBuilder, UpdateBuilder, SelectBuilder |
 | `orWhereEquals(col, val)` | `OR col = ?` | QueryBuilder, UpdateBuilder |
-| `whereNotEquals(col, val)` | `col != ?` | QueryBuilder, DeleteBuilder |
+| `whereNotEquals(col, val)` | `col != ?` | DeleteBuilder |
 | `whereGreaterThan(col, val)` | `col > ?` | QueryBuilder, DeleteBuilder |
 | `whereGreaterThanOrEquals(col, val)` | `col >= ?` | QueryBuilder, DeleteBuilder, UpdateBuilder |
-| `whereLessThan(col, val)` | `col < ?` | QueryBuilder, DeleteBuilder |
+| `whereLessThan(col, val)` | `col < ?` | DeleteBuilder |
 | `whereLessThanOrEquals(col, val)` | `col <= ?` | QueryBuilder, DeleteBuilder |
 | `whereLike(col, substr)` | `col LIKE ?` (wrapped with `%`) | QueryBuilder, SelectBuilder |
 | `whereNotLike(col, substr)` | `col NOT LIKE ?` (wrapped with `%`) | QueryBuilder |
@@ -158,6 +234,10 @@ public class UserStore implements QueryableStorage {
 | `whereIn(col, list)` | `col IN (?, ?, ...)` | QueryBuilder, DeleteBuilder, SelectBuilder |
 | `whereNotIn(col, list)` | `col NOT IN (?, ?, ...)` | QueryBuilder, DeleteBuilder |
 | `whereBetween(col, a, b)` | `col BETWEEN ? AND ?` | QueryBuilder, DeleteBuilder |
+| `whereInSubquery(col, subquery)` | `col IN (SELECT ...)` | QueryBuilder, DeleteBuilder |
+| `whereEqualsSubquery(col, subquery)` | `col = (SELECT ...)` | QueryBuilder |
+| `whereExistsSubquery(subquery)` | `EXISTS (SELECT ...)` | QueryBuilder, DeleteBuilder |
+| `whereNotExistsSubquery(subquery)` | `NOT EXISTS (SELECT ...)` | QueryBuilder |
 
 ## Builder Reference
 
@@ -174,10 +254,8 @@ new QueryBuilder()
     // --- conditions (all joined with AND unless or* variant used) ---
     .whereEquals("status", "active")        // status = ?
     .orWhereEquals("status", "pending")     // OR status = ?
-    .whereNotEquals("role", "banned")       // role != ?
     .whereGreaterThan("age", 18)            // age > ?
     .whereGreaterThanOrEquals("age", 18)    // age >= ?
-    .whereLessThan("score", 1000)           // score < ?
     .whereLessThanOrEquals("score", 1000)   // score <= ?
     .whereLike("username", "john")          // username LIKE '%john%'
     .whereNotLike("email", "spam")          // email NOT LIKE '%spam%'
@@ -187,6 +265,17 @@ new QueryBuilder()
     .whereIn("country", List.of("US", "CA"))
     .whereNotIn("role", List.of("bot", "banned"))
     .whereBetween("created_at", from, to)
+
+    // --- subquery conditions ---
+    .whereInSubquery("id", subquery)          // id IN (SELECT ...)
+    .whereEqualsSubquery("id", subquery)      // id = (SELECT ...)
+    .whereExistsSubquery(subquery)            // EXISTS (SELECT ...)
+    .whereNotExistsSubquery(subquery)         // NOT EXISTS (SELECT ...)
+
+    // --- subquery FROM / JOIN / SELECT ---
+    .fromSubquery(subquery, "alias")          // FROM (SELECT ...) AS alias
+    .joinSubquery(subquery, "alias", "t.id = alias.id") // INNER JOIN (SELECT ...) AS alias ON ...
+    .selectSubquery(subquery, "alias")        // (SELECT ...) AS alias appended to SELECT clause
 
     // --- sorting and grouping ---
     .groupBy("department")
@@ -261,6 +350,8 @@ QueryBuilder.deleteFrom("users")
     .whereIn("status", List.of("expired", "banned"))
     .whereNotIn("plan", List.of("premium", "trial"))
     .whereBetween("created_at", from, to)
+    .whereInSubquery("id", subquery)          // id IN (SELECT ...)
+    .whereExistsSubquery(subquery)            // EXISTS (SELECT ...)
     .build();                              // → SqlResult
 ```
 

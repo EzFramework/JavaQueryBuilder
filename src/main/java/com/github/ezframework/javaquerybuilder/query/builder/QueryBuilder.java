@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.github.ezframework.javaquerybuilder.query.JoinClause;
 import com.github.ezframework.javaquerybuilder.query.Query;
+import com.github.ezframework.javaquerybuilder.query.ScalarSelectItem;
 import com.github.ezframework.javaquerybuilder.query.condition.Condition;
 import com.github.ezframework.javaquerybuilder.query.condition.ConditionEntry;
 import com.github.ezframework.javaquerybuilder.query.condition.Connector;
@@ -67,6 +69,18 @@ public class QueryBuilder {
 
     /** The source table for SELECT. */
     private String table = null;
+
+    /** The FROM subquery when using a derived-table source; {@code null} for a plain table. */
+    private Query fromSubquery = null;
+
+    /** The alias for the FROM derived-table. */
+    private String fromAlias = null;
+
+    /** The JOIN clauses for the SELECT. */
+    private final List<JoinClause> joins = new ArrayList<>();
+
+    /** The scalar subquery items appended to the SELECT clause. */
+    private final List<ScalarSelectItem> selectSubqueries = new ArrayList<>();
 
     /**
      * Returns a new {@link InsertBuilder}.
@@ -409,6 +423,96 @@ public class QueryBuilder {
     }
 
     /**
+     * Adds a {@code WHERE col IN (SELECT ...)} condition using a subquery, joined with AND.
+     *
+     * @param column   the column to test
+     * @param subquery the subquery whose result set provides the IN values
+     * @return this builder instance for chaining
+     */
+    public QueryBuilder whereInSubquery(String column, Query subquery) {
+        conditions.add(new ConditionEntry(column,
+            new Condition(Operator.IN, subquery), Connector.AND));
+        return this;
+    }
+
+    /**
+     * Adds a {@code WHERE col = (SELECT ...)} condition using a subquery, joined with AND.
+     *
+     * @param column   the column to test
+     * @param subquery the scalar subquery to compare against
+     * @return this builder instance for chaining
+     */
+    public QueryBuilder whereEqualsSubquery(String column, Query subquery) {
+        conditions.add(new ConditionEntry(column,
+            new Condition(Operator.EQ, subquery), Connector.AND));
+        return this;
+    }
+
+    /**
+     * Adds a {@code WHERE EXISTS (SELECT ...)} condition, joined with AND.
+     *
+     * @param subquery the subquery to test for existence
+     * @return this builder instance for chaining
+     */
+    public QueryBuilder whereExistsSubquery(Query subquery) {
+        conditions.add(new ConditionEntry(null,
+            new Condition(Operator.EXISTS_SUBQUERY, subquery), Connector.AND));
+        return this;
+    }
+
+    /**
+     * Adds a {@code WHERE NOT EXISTS (SELECT ...)} condition, joined with AND.
+     *
+     * @param subquery the subquery to test for non-existence
+     * @return this builder instance for chaining
+     */
+    public QueryBuilder whereNotExistsSubquery(Query subquery) {
+        conditions.add(new ConditionEntry(null,
+            new Condition(Operator.NOT_EXISTS_SUBQUERY, subquery), Connector.AND));
+        return this;
+    }
+
+    /**
+     * Sets the FROM clause to a derived-table subquery with the given alias.
+     *
+     * <p>Calling this method replaces any table set via {@link #from(String)}.
+     *
+     * @param subquery the subquery to use as the FROM source
+     * @param alias    the alias for the derived table
+     * @return this builder instance for chaining
+     */
+    public QueryBuilder fromSubquery(Query subquery, String alias) {
+        this.fromSubquery = subquery;
+        this.fromAlias = alias;
+        return this;
+    }
+
+    /**
+     * Adds an {@code INNER JOIN (SELECT ...) AS alias ON condition} clause.
+     *
+     * @param subquery    the subquery to join against
+     * @param alias       the alias for the derived table
+     * @param onCondition the raw SQL ON condition fragment
+     * @return this builder instance for chaining
+     */
+    public QueryBuilder joinSubquery(Query subquery, String alias, String onCondition) {
+        joins.add(new JoinClause(JoinClause.Type.INNER, subquery, alias, onCondition));
+        return this;
+    }
+
+    /**
+     * Appends a scalar subquery as {@code (SELECT ...) AS alias} in the SELECT clause.
+     *
+     * @param subquery the scalar subquery to embed
+     * @param alias    the column alias
+     * @return this builder instance for chaining
+     */
+    public QueryBuilder selectSubquery(Query subquery, String alias) {
+        selectSubqueries.add(new ScalarSelectItem(subquery, alias));
+        return this;
+    }
+
+    /**
      * Adds one or more columns to the GROUP BY clause.
      *
      * @param columns the column names
@@ -482,6 +586,10 @@ public class QueryBuilder {
         q.setSelectColumns(new ArrayList<>(selectColumns));
         q.setDistinct(isDistinct);
         q.setHavingRaw(havingRaw);
+        q.setFromSubquery(fromSubquery);
+        q.setFromAlias(fromAlias);
+        q.setJoins(new ArrayList<>(joins));
+        q.setSelectSubqueries(new ArrayList<>(selectSubqueries));
         return q;
     }
 
