@@ -43,6 +43,18 @@ public class Query {
     /** The HAVING clause (raw SQL fragment). */
     private String havingRaw = null;
 
+    /** The FROM subquery when using a derived-table source; {@code null} for a plain table source. */
+    private Query fromSubquery = null;
+
+    /** The alias used for the FROM derived-table; only meaningful when {@code fromSubquery != null}. */
+    private String fromAlias = null;
+
+    /** The list of JOIN clauses (plain table or subquery). */
+    private List<JoinClause> joins = new ArrayList<>();
+
+    /** The list of scalar subquery items appended to the SELECT clause. */
+    private List<ScalarSelectItem> selectSubqueries = new ArrayList<>();
+
     /**
      * Gets the source table for the query.
      *
@@ -221,5 +233,77 @@ public class Query {
      */
     public void setHavingRaw(String havingRaw) {
         this.havingRaw = havingRaw;
+    }
+
+    /**
+     * Returns the FROM subquery when this query uses a derived-table source.
+     *
+     * @return the FROM subquery, or {@code null} for a plain table source
+     */
+    public Query getFromSubquery() {
+        return fromSubquery;
+    }
+
+    /**
+     * Sets the FROM subquery for a derived-table source.
+     *
+     * @param fromSubquery the subquery to use as the FROM source
+     */
+    public void setFromSubquery(Query fromSubquery) {
+        this.fromSubquery = fromSubquery;
+    }
+
+    /**
+     * Returns the alias for the FROM derived-table.
+     *
+     * @return the alias, or {@code null} when not using a subquery source
+     */
+    public String getFromAlias() {
+        return fromAlias;
+    }
+
+    /**
+     * Sets the alias for the FROM derived-table.
+     *
+     * @param fromAlias the alias to use
+     */
+    public void setFromAlias(String fromAlias) {
+        this.fromAlias = fromAlias;
+    }
+
+    /**
+     * Returns the list of JOIN clauses for this query.
+     *
+     * @return the list of JOIN clauses; never {@code null}
+     */
+    public List<JoinClause> getJoins() {
+        return joins;
+    }
+
+    /**
+     * Sets the list of JOIN clauses.
+     *
+     * @param joins the list of JOIN clauses
+     */
+    public void setJoins(List<JoinClause> joins) {
+        this.joins = joins;
+    }
+
+    /**
+     * Returns the list of scalar subquery items in the SELECT clause.
+     *
+     * @return the list of scalar select items; never {@code null}
+     */
+    public List<ScalarSelectItem> getSelectSubqueries() {
+        return selectSubqueries;
+    }
+
+    /**
+     * Sets the list of scalar subquery items for the SELECT clause.
+     *
+     * @param selectSubqueries the list of scalar select items
+     */
+    public void setSelectSubqueries(List<ScalarSelectItem> selectSubqueries) {
+        this.selectSubqueries = selectSubqueries;
     }
 }

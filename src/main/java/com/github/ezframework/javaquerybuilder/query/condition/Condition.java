@@ -2,6 +2,8 @@ package com.github.ezframework.javaquerybuilder.query.condition;
 
 import java.util.Map;
 
+import com.github.ezframework.javaquerybuilder.query.Query;
+
 /**
  * A single field condition used by {@link com.github.ezframework.javaquerybuilder.query.Query}.
  *
@@ -59,22 +61,28 @@ public class Condition {
             case EXISTS:
                 return exists;
             case EQ:
-                if (v == null) {
-                    return value == null;
-                }
-                return v.equals(value);
+                return matchesEq(v);
             case NEQ:
-                if (v == null) {
-                    return value != null;
-                }
-                return !v.equals(value);
+                return !matchesEq(v);
             case LIKE:
                 return matchesLike(v);
             case IN:
-                return matchesIn(v);
+                return !(value instanceof Query) && matchesIn(v);
+            case NOT_IN:
+                return !(value instanceof Query) && !matchesIn(v);
             default:
                 return false;
         }
+    }
+
+    private boolean matchesEq(Object v) {
+        if (value instanceof Query) {
+            return false;
+        }
+        if (v == null) {
+            return value == null;
+        }
+        return v.equals(value);
     }
 
     private boolean matchesLike(Object v) {

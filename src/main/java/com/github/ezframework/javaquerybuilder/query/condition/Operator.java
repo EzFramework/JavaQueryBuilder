@@ -34,5 +34,15 @@ public enum Operator {
     /** Negated collection membership ({@code NOT IN (...)}). */
     NOT_IN,
     /** Inclusive range check ({@code BETWEEN ? AND ?}). */
-    BETWEEN
+    BETWEEN,
+    /**
+     * True SQL {@code EXISTS (SELECT ...)} — value must be a
+     * {@link com.github.ezframework.javaquerybuilder.query.Query}.
+     */
+    EXISTS_SUBQUERY,
+    /**
+     * True SQL {@code NOT EXISTS (SELECT ...)} — value must be a
+     * {@link com.github.ezframework.javaquerybuilder.query.Query}.
+     */
+    NOT_EXISTS_SUBQUERY
 }

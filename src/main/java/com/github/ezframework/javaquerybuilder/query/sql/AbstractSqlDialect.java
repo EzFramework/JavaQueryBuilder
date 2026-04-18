@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.github.ezframework.javaquerybuilder.query.JoinClause;
 import com.github.ezframework.javaquerybuilder.query.Query;
+import com.github.ezframework.javaquerybuilder.query.ScalarSelectItem;
 import com.github.ezframework.javaquerybuilder.query.condition.ConditionEntry;
 import com.github.ezframework.javaquerybuilder.query.condition.Operator;
 
@@ -18,6 +20,14 @@ import com.github.ezframework.javaquerybuilder.query.condition.Operator;
  * {@link #quoteIdentifier(String)} to apply dialect-specific identifier quoting
  * and {@link #supportsDeleteLimit()} to enable dialect-specific DELETE
  * {@code LIMIT} behaviour.
+ *
+ * <p>Subquery support — parameter ordering contract:
+ * <ol>
+ *   <li>SELECT-list scalar subquery parameters (left to right)</li>
+ *   <li>FROM subquery parameters</li>
+ *   <li>JOIN subquery parameters (left to right)</li>
+ *   <li>WHERE condition subquery parameters (top to bottom)</li>
+ * </ol>
  *
  * @author EzFramework
  * @version 1.0.0
@@ -74,12 +84,12 @@ public class AbstractSqlDialect implements SqlDialect {
     }
 
     /**
-     * Hook for dialects that support a `LIMIT` clause on DELETE statements
+     * Hook for dialects that support a {@code LIMIT} clause on DELETE statements
      * (for example, MySQL). The default implementation returns {@code false},
-     * meaning the base renderer will ignore `limit` on `Query` for DELETE.
-     * Subclasses that want to enable `LIMIT` should override this method.
+     * meaning the base renderer will ignore {@code limit} on {@link Query} for DELETE.
+     * Subclasses that want to enable {@code LIMIT} should override this method.
      *
-     * @return {@code true} if the dialect appends a `LIMIT` to DELETE statements
+     * @return {@code true} if the dialect appends a {@code LIMIT} to DELETE statements
      */
     protected boolean supportsDeleteLimit() {
         return false;
@@ -93,8 +103,9 @@ public class AbstractSqlDialect implements SqlDialect {
         if (query.isDistinct()) {
             sql.append("DISTINCT ");
         }
-        appendSelectColumns(sql, query);
-        sql.append(" FROM ").append(quoteIdentifier(query.getTable()));
+        appendSelectColumns(sql, params, query);
+        appendFromClause(sql, params, query);
+        appendJoinClauses(sql, params, query);
         appendWhereClause(sql, params, query);
         if (!query.getGroupBy().isEmpty()) {
             final String cols = query.getGroupBy().stream()
@@ -126,15 +137,62 @@ public class AbstractSqlDialect implements SqlDialect {
         };
     }
 
-    private void appendSelectColumns(StringBuilder sql, Query query) {
-        if (query.getSelectColumns().isEmpty()) {
+    private void appendSelectColumns(StringBuilder sql, List<Object> params, Query query) {
+        final List<String> cols = query.getSelectColumns();
+        final List<ScalarSelectItem> subItems = query.getSelectSubqueries();
+        if (cols.isEmpty() && subItems.isEmpty()) {
             sql.append("*");
+            return;
+        }
+        final List<String> fragments = new ArrayList<>();
+        for (final String col : cols) {
+            fragments.add(quoteIdentifier(col));
+        }
+        for (final ScalarSelectItem item : subItems) {
+            final SqlResult sub = render(item.getSubquery());
+            params.addAll(sub.getParameters());
+            fragments.add("(" + sub.getSql() + ") AS " + quoteIdentifier(item.getAlias()));
+        }
+        sql.append(String.join(", ", fragments));
+    }
+
+    private void appendFromClause(StringBuilder sql, List<Object> params, Query query) {
+        if (query.getFromSubquery() != null) {
+            final SqlResult sub = render(query.getFromSubquery());
+            params.addAll(sub.getParameters());
+            sql.append(" FROM (").append(sub.getSql()).append(") AS ")
+               .append(quoteIdentifier(query.getFromAlias()));
         } else {
-            sql.append(query.getSelectColumns().stream()
-                .map(this::quoteIdentifier).collect(Collectors.joining(", ")));
+            sql.append(" FROM ").append(quoteIdentifier(query.getTable()));
         }
     }
 
+    private void appendJoinClauses(StringBuilder sql, List<Object> params, Query query) {
+        for (final JoinClause join : query.getJoins()) {
+            sql.append(" ").append(join.getType().name()).append(" JOIN ");
+            if (join.getSubquery() != null) {
+                final SqlResult sub = render(join.getSubquery());
+                params.addAll(sub.getParameters());
+                sql.append("(").append(sub.getSql()).append(") AS ")
+                   .append(quoteIdentifier(join.getAlias()));
+            } else {
+                sql.append(quoteIdentifier(join.getTable()));
+            }
+            if (join.getOnCondition() != null) {
+                sql.append(" ON ").append(join.getOnCondition());
+            }
+        }
+    }
+
+    /**
+     * Appends a {@code WHERE} clause to {@code sql}, collecting bound parameters into
+     * {@code params}. For conditions whose column is {@code null} (e.g. EXISTS subquery
+     * conditions), the column fragment is omitted.
+     *
+     * @param sql    the SQL string builder
+     * @param params the bound-parameter list
+     * @param query  the source query
+     */
     protected void appendWhereClause(StringBuilder sql, List<Object> params, Query query) {
         final List<ConditionEntry> conditions = query.getConditions();
         if (conditions.isEmpty()) {
@@ -146,27 +204,95 @@ public class AbstractSqlDialect implements SqlDialect {
             if (i > 0) {
                 sql.append(" ").append(entry.getConnector().name()).append(" ");
             }
-            sql.append(quoteIdentifier(entry.getColumn())).append(" ");
+            if (entry.getColumn() != null) {
+                sql.append(quoteIdentifier(entry.getColumn())).append(" ");
+            }
             appendConditionFragment(sql, params, entry);
         }
     }
 
+    /**
+     * Appends the operator and value fragment for a single condition, collecting bound
+     * parameters. Handles scalar values, {@link java.util.List}-valued operators, and
+     * {@link Query}-valued subquery operators.
+     *
+     * @param sql    the SQL string builder
+     * @param params the bound-parameter list
+     * @param entry  the condition entry to render
+     */
     @SuppressWarnings("unchecked")
     protected void appendConditionFragment(StringBuilder sql, List<Object> params, ConditionEntry entry) {
         final Operator op = entry.getCondition().getOperator();
-        if (COMPARISON_OPERATORS.containsKey(op)) {
-            sql.append(COMPARISON_OPERATORS.get(op));
-            params.add(entry.getCondition().getValue());
+        final Object val = entry.getCondition().getValue();
+
+        if (val instanceof Query) {
+            appendSubqueryCondition(sql, params, op, (Query) val);
             return;
         }
+        if (COMPARISON_OPERATORS.containsKey(op)) {
+            sql.append(COMPARISON_OPERATORS.get(op));
+            params.add(val);
+            return;
+        }
+        appendNonComparisonFragment(sql, params, op, val);
+    }
+
+    private void appendSubqueryCondition(
+            StringBuilder sql, List<Object> params, Operator op, Query subquery) {
+        if (op == Operator.EXISTS_SUBQUERY) {
+            appendSubqueryExists(sql, params, subquery, false);
+        } else if (op == Operator.NOT_EXISTS_SUBQUERY) {
+            appendSubqueryExists(sql, params, subquery, true);
+        } else if (op == Operator.IN) {
+            appendSubqueryIn(sql, params, subquery, false);
+        } else if (op == Operator.NOT_IN) {
+            appendSubqueryIn(sql, params, subquery, true);
+        } else if (COMPARISON_OPERATORS.containsKey(op)) {
+            appendSubqueryComparison(sql, params, op, subquery);
+        }
+    }
+
+    private void appendSubqueryExists(
+            StringBuilder sql, List<Object> params, Query subquery, boolean negate) {
+        final SqlResult sub = render(subquery);
+        params.addAll(sub.getParameters());
+        if (negate) {
+            sql.append("NOT EXISTS (").append(sub.getSql()).append(")");
+        } else {
+            sql.append("EXISTS (").append(sub.getSql()).append(")");
+        }
+    }
+
+    private void appendSubqueryIn(
+            StringBuilder sql, List<Object> params, Query subquery, boolean negate) {
+        final SqlResult sub = render(subquery);
+        params.addAll(sub.getParameters());
+        if (negate) {
+            sql.append("NOT IN (").append(sub.getSql()).append(")");
+        } else {
+            sql.append("IN (").append(sub.getSql()).append(")");
+        }
+    }
+
+    private void appendSubqueryComparison(
+            StringBuilder sql, List<Object> params, Operator op, Query subquery) {
+        final SqlResult sub = render(subquery);
+        params.addAll(sub.getParameters());
+        final String fragment = COMPARISON_OPERATORS.get(op).replace("?", "(" + sub.getSql() + ")");
+        sql.append(fragment);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void appendNonComparisonFragment(
+            StringBuilder sql, List<Object> params, Operator op, Object val) {
         switch (op) {
             case LIKE:
                 sql.append("LIKE ?");
-                params.add("%" + entry.getCondition().getValue() + "%");
+                params.add("%" + val + "%");
                 break;
             case NOT_LIKE:
                 sql.append("NOT LIKE ?");
-                params.add("%" + entry.getCondition().getValue() + "%");
+                params.add("%" + val + "%");
                 break;
             case EXISTS:
                 sql.append("IS NOT NULL");
@@ -177,30 +303,32 @@ public class AbstractSqlDialect implements SqlDialect {
             case IS_NOT_NULL:
                 sql.append("IS NOT NULL");
                 break;
-            case IN: {
-                final List<?> inVals = (List<?>) entry.getCondition().getValue();
-                sql.append("IN (").append(String.join(", ", Collections.nCopies(inVals.size(), "?"))).append(")");
-                params.addAll(inVals);
+            case IN:
+                appendInList(sql, params, (List<?>) val, false);
                 break;
-            }
-            case NOT_IN: {
-                final List<?> notInVals = (List<?>) entry.getCondition().getValue();
-                sql.append("NOT IN (")
-                    .append(String.join(", ", Collections.nCopies(notInVals.size(), "?")))
-                    .append(")");
-                params.addAll(notInVals);
+            case NOT_IN:
+                appendInList(sql, params, (List<?>) val, true);
                 break;
-            }
-            case BETWEEN: {
-                final List<?> betweenVals = (List<?>) entry.getCondition().getValue();
+            case BETWEEN:
+                final List<?> between = (List<?>) val;
                 sql.append("BETWEEN ? AND ?");
-                params.add(betweenVals.get(0));
-                params.add(betweenVals.get(1));
+                params.add(between.get(0));
+                params.add(between.get(1));
                 break;
-            }
             default:
                 break;
         }
+    }
+
+    private void appendInList(
+            StringBuilder sql, List<Object> params, List<?> values, boolean negate) {
+        final String placeholders = String.join(", ", Collections.nCopies(values.size(), "?"));
+        if (negate) {
+            sql.append("NOT IN (").append(placeholders).append(")");
+        } else {
+            sql.append("IN (").append(placeholders).append(")");
+        }
+        params.addAll(values);
     }
 
     private void appendOrderByClause(StringBuilder sql, Query query) {
