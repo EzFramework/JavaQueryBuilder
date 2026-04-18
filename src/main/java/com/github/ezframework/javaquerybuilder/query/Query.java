@@ -56,6 +56,18 @@ public class Query {
     private List<ScalarSelectItem> selectSubqueries = new ArrayList<>();
 
     /**
+     * The column expression rendered when {@code selectColumns} is empty.
+     * Defaults to {@code "*"}; overridable via {@link QueryBuilderDefaults}.
+     */
+    private String defaultSelectColumns = "*";
+
+    /** Prefix prepended to values for LIKE and NOT LIKE conditions. */
+    private String likePrefix = "%";
+
+    /** Suffix appended to values for LIKE and NOT LIKE conditions. */
+    private String likeSuffix = "%";
+
+    /**
      * Gets the source table for the query.
      *
      * @return the table name, or {@code null} if not set
@@ -305,5 +317,65 @@ public class Query {
      */
     public void setSelectSubqueries(List<ScalarSelectItem> selectSubqueries) {
         this.selectSubqueries = selectSubqueries;
+    }
+
+    /**
+     * Returns the column expression used in {@code SELECT} when no explicit
+     * columns are configured on the builder.
+     *
+     * @return the default column expression; never {@code null}
+     */
+    public String getDefaultSelectColumns() {
+        return defaultSelectColumns;
+    }
+
+    /**
+     * Sets the column expression used in {@code SELECT} when no explicit
+     * columns are configured.
+     *
+     * @param defaultSelectColumns the column expression; must not be {@code null}
+     */
+    public void setDefaultSelectColumns(final String defaultSelectColumns) {
+        this.defaultSelectColumns = defaultSelectColumns;
+    }
+
+    /**
+     * Returns the prefix prepended to values for {@code LIKE} and
+     * {@code NOT LIKE} conditions.
+     *
+     * @return the LIKE prefix; never {@code null}
+     */
+    public String getLikePrefix() {
+        return likePrefix;
+    }
+
+    /**
+     * Sets the prefix prepended to values for {@code LIKE} and
+     * {@code NOT LIKE} conditions.
+     *
+     * @param likePrefix the LIKE prefix; must not be {@code null}
+     */
+    public void setLikePrefix(final String likePrefix) {
+        this.likePrefix = likePrefix;
+    }
+
+    /**
+     * Returns the suffix appended to values for {@code LIKE} and
+     * {@code NOT LIKE} conditions.
+     *
+     * @return the LIKE suffix; never {@code null}
+     */
+    public String getLikeSuffix() {
+        return likeSuffix;
+    }
+
+    /**
+     * Sets the suffix appended to values for {@code LIKE} and
+     * {@code NOT LIKE} conditions.
+     *
+     * @param likeSuffix the LIKE suffix; must not be {@code null}
+     */
+    public void setLikeSuffix(final String likeSuffix) {
+        this.likeSuffix = likeSuffix;
     }
 }
