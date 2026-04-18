@@ -86,6 +86,35 @@ public class QueryBuilderDefaultsTest {
     }
 
     @Test
+    void builderFromNullSourceThrowsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> QueryBuilderDefaults.builder(null));
+    }
+
+    @Test
+    void builderDialectSetToNullThrowsNullPointerException() {
+        assertThrows(NullPointerException.class,
+            () -> QueryBuilderDefaults.builder().dialect(null));
+    }
+
+    @Test
+    void builderDefaultColumnsSetToNullThrowsNullPointerException() {
+        assertThrows(NullPointerException.class,
+            () -> QueryBuilderDefaults.builder().defaultColumns(null));
+    }
+
+    @Test
+    void builderLikePrefixSetToNullThrowsNullPointerException() {
+        assertThrows(NullPointerException.class,
+            () -> QueryBuilderDefaults.builder().likePrefix(null));
+    }
+
+    @Test
+    void builderLikeSuffixSetToNullThrowsNullPointerException() {
+        assertThrows(NullPointerException.class,
+            () -> QueryBuilderDefaults.builder().likeSuffix(null));
+    }
+
+    @Test
     void withDefaultsNullThrowsNullPointerExceptionOnQueryBuilder() {
         assertThrows(NullPointerException.class,
             () -> new QueryBuilder().withDefaults(null));
@@ -310,6 +339,19 @@ public class QueryBuilderDefaultsTest {
 
         assertTrue(result.getSql().contains("LIMIT 30"),
             "Expected LIMIT 30: " + result.getSql());
+    }
+
+    @Test
+    void selectBuilderDefaultOffsetApplied() {
+        QueryBuilderDefaults defaults = QueryBuilderDefaults.builder()
+            .defaultLimit(10)
+            .defaultOffset(5)
+            .build();
+
+        SqlResult result = new SelectBuilder().withDefaults(defaults).from("users").build();
+
+        assertTrue(result.getSql().contains("OFFSET 5"),
+            "Expected OFFSET 5: " + result.getSql());
     }
 
     @Test
