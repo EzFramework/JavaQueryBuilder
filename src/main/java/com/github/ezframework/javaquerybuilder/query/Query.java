@@ -67,6 +67,9 @@ public class Query {
     /** Suffix appended to values for LIKE and NOT LIKE conditions. */
     private String likeSuffix = "%";
 
+    /** The columns to include in a {@code RETURNING} clause; empty means no RETURNING. */
+    private List<String> returningColumns = new ArrayList<>();
+
     /**
      * Gets the source table for the query.
      *
@@ -377,5 +380,25 @@ public class Query {
      */
     public void setLikeSuffix(final String likeSuffix) {
         this.likeSuffix = likeSuffix;
+    }
+
+    /**
+     * Returns the columns to include in a {@code RETURNING} clause.
+     *
+     * <p>An empty list means no {@code RETURNING} clause will be rendered.
+     *
+     * @return the list of returning column names; never {@code null}
+     */
+    public List<String> getReturningColumns() {
+        return returningColumns;
+    }
+
+    /**
+     * Sets the columns to include in a {@code RETURNING} clause.
+     *
+     * @param returningColumns the list of column names; must not be {@code null}
+     */
+    public void setReturningColumns(final List<String> returningColumns) {
+        this.returningColumns = returningColumns;
     }
 }
