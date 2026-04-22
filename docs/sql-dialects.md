@@ -21,11 +21,12 @@ description: "SqlDialect, SqlResult, AbstractSqlDialect, and the dialect matrix"
 parameterized `SqlResult`. Three built-in dialects are provided as constants
 on the interface:
 
-| Constant | Identifier quoting | DELETE LIMIT |
-|----------|--------------------|--------------|
-| `SqlDialect.STANDARD` | None (ANSI) | Not supported |
-| `SqlDialect.MYSQL` | Back-tick `` ` `` | Supported |
-| `SqlDialect.SQLITE` | Double-quote `"` | Supported |
+| Constant | Identifier quoting | DELETE LIMIT | ILIKE | RETURNING |
+|----------|--------------------|--------------| ------|----------|
+| `SqlDialect.STANDARD` | None (ANSI) | Not supported | No | No |
+| `SqlDialect.MYSQL` | Back-tick `` ` `` | Supported | No | No |
+| `SqlDialect.SQLITE` | Double-quote `"` | Supported | No | No |
+| `SqlDialect.POSTGRESQL` | Double-quote `"` | Not supported | Yes | Yes (DELETE) |
 
 ---
 
@@ -54,6 +55,14 @@ SqlResult r3 = new QueryBuilder()
     .whereEquals("id", 1)
     .buildSql(SqlDialect.SQLITE);
 // → SELECT * FROM "users" WHERE "id" = ?
+
+// PostgreSQL: double-quoted identifiers + ILIKE support
+SqlResult r4 = new QueryBuilder()
+    .from("users")
+    .whereILike("email", "alice")
+    .buildSql(SqlDialect.POSTGRESQL);
+// → SELECT * FROM "users" WHERE "email" ILIKE ?
+// Parameters: ["%alice%"]
 ```
 
 ---
@@ -87,7 +96,8 @@ List<Object> params = result.getParameters();
 ## Rendering DELETE statements
 
 Use `renderDelete(Query)` on a dialect instance to produce `DELETE FROM ...`
-statements. This respects the `LIMIT` clause on dialects that support it.
+statements. This respects the `LIMIT` clause on dialects that support it and
+the `RETURNING` clause on PostgreSQL.
 
 ```java
 Query q = new QueryBuilder()
@@ -109,25 +119,30 @@ SqlResult sq = SqlDialect.SQLITE.renderDelete(q);
 // → DELETE FROM "sessions" WHERE "expired" = ? LIMIT 500
 ```
 
+For PostgreSQL `RETURNING`, use `DeleteBuilder.returning()` — see [DML Builders](dml-builders#returning-clause-postgresql).
+
 ---
 
 ## Dialect matrix
 
 The same `Query` produces different SQL across dialects due to identifier quoting:
 
-| Feature | STANDARD | MYSQL | SQLITE |
-|---------|----------|-------|--------|
-| Table quoting | `users` | `` `users` `` | `"users"` |
-| Column quoting | `id` | `` `id` `` | `"id"` |
-| DELETE LIMIT | No | Yes | Yes |
-| Parameter syntax | `?` | `?` | `?` |
+| Feature | STANDARD | MYSQL | SQLITE | POSTGRESQL |
+|---------|----------|-------|--------|------------|
+| Table quoting | `users` | `` `users` `` | `"users"` | `"users"` |
+| Column quoting | `id` | `` `id` `` | `"id"` | `"id"` |
+| DELETE LIMIT | No | Yes | Yes | No |
+| ILIKE / NOT ILIKE | No | No | No | Yes |
+| RETURNING on DELETE | No | No | No | Yes |
+| Parameter syntax | `?` | `?` | `?` | `?` |
 
 ---
 
 ## AbstractSqlDialect
 
 `AbstractSqlDialect` implements the shared rendering logic for SELECT and DELETE
-queries. It is the base class for both `MySqlDialect` and `SqliteDialect`.
+queries. It is the base class for `MySqlDialect`, `SqliteDialect`, and
+`PostgreSqlDialect`.
 
 **Subquery parameter ordering**: parameters are collected depth-first in this
 order:
@@ -137,17 +152,9 @@ order:
 3. JOIN subquery parameters (left to right)
 4. WHERE condition subquery parameters (top to bottom)
 
-To create a custom dialect (e.g. PostgreSQL with `"..."` quoting), extend
-`AbstractSqlDialect` and override `quoteIdentifier`:
-
-```java
-public class PostgreSqlDialect extends AbstractSqlDialect {
-    @Override
-    protected String quoteIdentifier(String name) {
-        return '"' + name + '"';
-    }
-}
-```
+To create a fully custom dialect, extend `AbstractSqlDialect` and override any
+combination of `quoteIdentifier`, `supportsDeleteLimit`, `supportsReturning`,
+and `appendConditionFragment`.
 
 ---
 
@@ -158,5 +165,6 @@ public class PostgreSqlDialect extends AbstractSqlDialect {
 | `SqlDialect.STANDARD` | ANSI SQL constant instance |
 | `SqlDialect.MYSQL` | MySQL dialect constant instance |
 | `SqlDialect.SQLITE` | SQLite dialect constant instance |
+| `SqlDialect.POSTGRESQL` | PostgreSQL dialect constant instance |
 | `render(Query)` | Render a `SELECT` query to `SqlResult` |
-| `renderDelete(Query)` | Render a `DELETE` query to `SqlResult`; observes `LIMIT` on supporting dialects |
+| `renderDelete(Query)` | Render a `DELETE` query to `SqlResult`; observes `LIMIT` and `RETURNING` on supporting dialects |

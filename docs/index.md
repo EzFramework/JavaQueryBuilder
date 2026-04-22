@@ -9,7 +9,7 @@ permalink: /
 # JavaQueryBuilder
 
 [![JitPack](https://jitpack.io/v/EzFramework/JavaQueryBuilder.svg)](https://jitpack.io/#EzFramework/JavaQueryBuilder)
-[![GitHub Packages](https://img.shields.io/badge/GitHub_Packages-1.0.4-blue?logo=github)](https://github.com/EzFramework/JavaQueryBuilder/packages)
+[![GitHub Packages](https://img.shields.io/badge/GitHub_Packages-1.1.0-blue?logo=github)](https://github.com/EzFramework/JavaQueryBuilder/packages)
 
 **JavaQueryBuilder** is a lightweight, fluent Java library for building
 parameterized SQL queries and filtering in-memory data.
@@ -24,12 +24,12 @@ No runtime dependencies required.
 - **DML builders**: `InsertBuilder`, `UpdateBuilder`, `DeleteBuilder`, `CreateBuilder`
 - **Parameterized-only**: user values always go through `?` bind parameters; SQL injection
   is structurally impossible
-- **16 operators**: equality, comparison, `LIKE`, `NULL` checks, `IN`, `BETWEEN`,
+- **18 operators**: equality, comparison, `LIKE`, `ILIKE` (PostgreSQL), `NULL` checks, `IN`, `BETWEEN`,
   `EXISTS`, and subquery operators
 - **Subquery support**: `WHERE col IN (SELECT ...)`, `WHERE EXISTS (SELECT ...)`,
   `WHERE NOT EXISTS (SELECT ...)`, scalar `WHERE col = (SELECT ...)`,
   FROM-derived table, JOIN subquery, and scalar `SELECT` items
-- **Three SQL dialects**: `STANDARD` (ANSI), `MYSQL` (back-tick quoting), `SQLITE` (double-quote)
+- **Four SQL dialects**: `STANDARD` (ANSI), `MYSQL` (back-tick quoting), `SQLITE` (double-quote), `POSTGRESQL` (double-quote + `ILIKE` + `RETURNING`)
 - **Global and per-query configuration** via `QueryBuilderDefaults`: preset dialect, default
   columns, limit, offset, and LIKE wrapping once at application startup
 - **In-memory filtering**: `QueryableStorage` functional interface applies the same `Query`
@@ -53,7 +53,7 @@ No runtime dependencies required.
 <dependency>
   <groupId>com.github.EzFramework</groupId>
   <artifactId>JavaQueryBuilder</artifactId>
-  <version>1.0.4</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 
@@ -104,9 +104,9 @@ SqlResult update = QueryBuilder.update("users")
 | [Installation](installation) | Maven, Gradle, JitPack, GitHub Packages |
 | [Query Builder](query-builder) | SELECT: `from`, `select`, `where*`, `orderBy`, `build` |
 | [DML Builders](dml-builders) | `InsertBuilder`, `UpdateBuilder`, `DeleteBuilder`, `CreateBuilder` |
-| [Conditions](conditions) | All 16 operators, `Condition`, `ConditionEntry`, `Connector` |
+| [Conditions](conditions) | All 18 operators, `Condition`, `ConditionEntry`, `Connector` |
 | [Subqueries](subqueries) | All six subquery variants |
-| [SQL Dialects](sql-dialects) | `STANDARD`, `MYSQL`, `SQLITE`, `SqlResult`, dialect matrix |
+| [SQL Dialects](sql-dialects) | `STANDARD`, `MYSQL`, `SQLITE`, `POSTGRESQL`, `SqlResult`, dialect matrix |
 | [Configuration](configuration) | `QueryBuilderDefaults`: global and per-query dialect, columns, limit, LIKE wrapping |
 | [In-Memory Filtering](in-memory) | `QueryableStorage`: filter collections without a database |
 | [Exceptions](exceptions) | Error hierarchy and handling patterns |

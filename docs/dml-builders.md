@@ -61,6 +61,7 @@ SqlResult result = QueryBuilder.insertInto("users")
 |--------|---------|-------------|
 | `into(String table)` | `InsertBuilder` | Set target table (also available via factory) |
 | `value(String col, Object val)` | `InsertBuilder` | Add a column/value pair |
+| `returning(String... cols)` | `InsertBuilder` | Append `RETURNING col1, col2, ...` (PostgreSQL only) |
 | `build()` | `SqlResult` | Render with standard dialect |
 | `build(SqlDialect dialect)` | `SqlResult` | Render with specified dialect |
 
@@ -111,6 +112,7 @@ SqlResult result = QueryBuilder.update("users")
 | `whereEquals(String col, Object val)` | `UpdateBuilder` | `WHERE col = ?` (AND) |
 | `orWhereEquals(String col, Object val)` | `UpdateBuilder` | `WHERE col = ?` (OR) |
 | `whereGreaterThanOrEquals(String col, int val)` | `UpdateBuilder` | `WHERE col >= ?` (AND) |
+| `returning(String... cols)` | `UpdateBuilder` | Append `RETURNING col1, col2, ...` (PostgreSQL only) |
 | `build()` | `SqlResult` | Render with standard dialect |
 | `build(SqlDialect dialect)` | `SqlResult` | Render with specified dialect |
 
@@ -186,8 +188,62 @@ SqlResult result = SqlDialect.MYSQL.renderDelete(q);
 | `whereIn(col, List<?>)` | `DeleteBuilder` | `WHERE col IN (...)` (AND) |
 | `whereNotIn(col, List<?>)` | `DeleteBuilder` | `WHERE col NOT IN (...)` (AND) |
 | `whereBetween(col, from, to)` | `DeleteBuilder` | `WHERE col BETWEEN ? AND ?` (AND) |
+| `returning(String... cols)` | `DeleteBuilder` | Append `RETURNING col1, col2, ...` (PostgreSQL only; use with `SqlDialect.POSTGRESQL`) |
 | `build()` | `SqlResult` | Render with standard dialect |
 | `build(SqlDialect dialect)` | `SqlResult` | Render with specified dialect |
+
+---
+
+## RETURNING clause (PostgreSQL)
+{: #returning-clause-postgresql }
+
+All three DML builders support a `RETURNING` clause for PostgreSQL, which
+lets the database return column values from affected rows in a single round-trip.
+
+### DELETE … RETURNING
+
+`RETURNING` on `DELETE` is rendered by the dialect — it is only appended when
+`SqlDialect.POSTGRESQL` (or another dialect that overrides `supportsReturning()`)
+is active.
+
+```java
+SqlResult result = QueryBuilder.deleteFrom("users")
+    .whereEquals("id", 99)
+    .returning("id", "email")
+    .build(SqlDialect.POSTGRESQL);
+
+// → DELETE FROM "users" WHERE "id" = ? RETURNING id, email
+// Parameters: [99]
+```
+
+### INSERT … RETURNING
+
+`RETURNING` on `INSERT` is appended inline regardless of dialect — the caller
+is responsible for using a PostgreSQL connection.
+
+```java
+SqlResult result = QueryBuilder.insertInto("users")
+    .value("name", "Alice")
+    .value("email", "alice@example.com")
+    .returning("id", "created_at")
+    .build();
+
+// → INSERT INTO users (name, email) VALUES (?, ?) RETURNING id, created_at
+// Parameters: ["Alice", "alice@example.com"]
+```
+
+### UPDATE … RETURNING
+
+```java
+SqlResult result = QueryBuilder.update("users")
+    .set("status", "active")
+    .whereEquals("id", 7)
+    .returning("id", "updated_at")
+    .build();
+
+// → UPDATE users SET status = ? WHERE id = ? RETURNING id, updated_at
+// Parameters: ["active", 7]
+```
 
 ---
 
