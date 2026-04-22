@@ -16,4 +16,9 @@ public class SqlDialectTest {
     void sqliteDialectIsSingleton() {
         assertSame(SqlDialect.SQLITE, SqlDialect.SQLITE);
     }
+
+    @Test
+    void postgresqlDialectIsSingleton() {
+        assertSame(SqlDialect.POSTGRESQL, SqlDialect.POSTGRESQL);
+    }
 }
