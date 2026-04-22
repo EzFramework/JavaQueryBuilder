@@ -285,6 +285,51 @@ public class QueryBuilder {
     }
 
     /**
+     * Adds an {@code ILIKE} WHERE condition joined with AND (PostgreSQL only).
+     *
+     * <p>Produces case-insensitive pattern matching. Rendered correctly only when
+     * the active dialect is {@link com.github.ezframework.javaquerybuilder.query.sql.SqlDialect#POSTGRESQL}.
+     * The configured like prefix and suffix are applied to the value.
+     *
+     * @param column the column name
+     * @param value  the pattern to match (prefix/suffix applied automatically)
+     * @return this builder instance for chaining
+     */
+    public QueryBuilder whereILike(final String column, final String value) {
+        conditions.add(
+            new ConditionEntry(
+                column,
+                new Condition(Operator.ILIKE, value),
+                conditions.isEmpty() ? Connector.AND : Connector.AND
+            )
+        );
+        return this;
+    }
+
+    /**
+     * Adds a {@code NOT ILIKE} WHERE condition joined with OR (PostgreSQL only).
+     *
+     * <p>Produces negated case-insensitive pattern matching. Rendered correctly only
+     * when the active dialect is
+     * {@link com.github.ezframework.javaquerybuilder.query.sql.SqlDialect#POSTGRESQL}.
+     * The configured like prefix and suffix are applied to the value.
+     *
+     * @param column the column name
+     * @param value  the pattern to match (prefix/suffix applied automatically)
+     * @return this builder instance for chaining
+     */
+    public QueryBuilder orWhereILike(final String column, final String value) {
+        conditions.add(
+            new ConditionEntry(
+                column,
+                new Condition(Operator.ILIKE, value),
+                Connector.OR
+            )
+        );
+        return this;
+    }
+
+    /**
      * Adds an {@code EXISTS} WHERE condition joined with AND.
      *
      * @param column the column name

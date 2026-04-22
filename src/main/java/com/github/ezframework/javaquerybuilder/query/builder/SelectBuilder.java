@@ -154,6 +154,24 @@ public class SelectBuilder {
     }
 
     /**
+     * Adds a {@code WHERE ILIKE} condition (PostgreSQL case-insensitive match) joined with AND.
+     *
+     * <p>Rendered correctly only when the active dialect is
+     * {@link com.github.ezframework.javaquerybuilder.query.sql.SqlDialect#POSTGRESQL}.
+     *
+     * @param column the column name
+     * @param value  the pattern to match (prefix/suffix applied automatically)
+     * @return this builder
+     */
+    public SelectBuilder whereILike(final String column, final String value) {
+        conditions.add(new ConditionEntry(
+                column,
+                new Condition(Operator.ILIKE, value),
+                conditions.isEmpty() ? Connector.AND : Connector.AND));
+        return this;
+    }
+
+    /**
      * Adds a GROUP BY clause.
      * @param columns the columns to group by
      * @return this builder
