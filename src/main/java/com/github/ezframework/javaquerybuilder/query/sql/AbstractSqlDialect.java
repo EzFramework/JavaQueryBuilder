@@ -17,9 +17,9 @@ import com.github.ezframework.javaquerybuilder.query.condition.Operator;
  *
  * <p>Implements the standard (ANSI) SQL dialect and provides shared helpers for
  * rendering {@code WHERE} clauses. Subclasses may override
- * {@link #quoteIdentifier(String)} to apply dialect-specific identifier quoting
- * and {@link #supportsDeleteLimit()} to enable dialect-specific DELETE
- * {@code LIMIT} behaviour.
+ * {@link #quoteIdentifier(String)} to apply dialect-specific identifier quoting,
+ * {@link #supportsDeleteLimit()} to enable dialect-specific DELETE {@code LIMIT}
+ * behaviour, and {@link #supportsReturning()} to enable a {@code RETURNING} clause.
  *
  * <p>Subquery support — parameter ordering contract:
  * <ol>
@@ -67,6 +67,9 @@ public class AbstractSqlDialect implements SqlDialect {
         if (supportsDeleteLimit() && query.getLimit() != null && query.getLimit() >= 0) {
             sql.append(" LIMIT ").append(query.getLimit());
         }
+        if (supportsReturning() && !query.getReturningColumns().isEmpty()) {
+            sql.append(" RETURNING ").append(String.join(", ", query.getReturningColumns()));
+        }
 
         final String sqlStr = sql.toString();
         final List<Object> paramsCopy = Collections.unmodifiableList(new ArrayList<>(params));
@@ -92,6 +95,17 @@ public class AbstractSqlDialect implements SqlDialect {
      * @return {@code true} if the dialect appends a {@code LIMIT} to DELETE statements
      */
     protected boolean supportsDeleteLimit() {
+        return false;
+    }
+
+    /**
+     * Hook for dialects that support a {@code RETURNING} clause on DELETE statements
+     * (for example, PostgreSQL). The default implementation returns {@code false}.
+     * Subclasses that want to enable {@code RETURNING} should override this method.
+     *
+     * @return {@code true} if the dialect appends a {@code RETURNING} clause to DELETE statements
+     */
+    protected boolean supportsReturning() {
         return false;
     }
 
