@@ -6,7 +6,6 @@
 
 A lightweight, fluent Java library for building parameterized SQL queries and filtering in-memory data, no runtime dependencies required.
 
-
 ## Features
 
 - Fluent, readable builder API for SELECT, INSERT, UPDATE, DELETE, and CREATE TABLE
@@ -393,7 +392,6 @@ new SelectBuilder()
     .build();                              // → SqlResult
 ```
 
-
 ## Global and Per-Query Configuration
 
 You can preset the default SQL dialect, default columns, limit, offset, and LIKE wrapping for all queries using `QueryBuilderDefaults`. This is useful for enforcing a project-wide dialect (e.g., always use SQLite) or customizing builder defaults.
@@ -498,7 +496,6 @@ SqlDialect.SQLITE.renderDelete(query);
 `buildSql(table)` (or `query.toSql(table)`) translates the `Query` into a single-line parameterized SQL string. All values are returned separately as a `List<Object>` — the SQL string itself only contains `?` placeholders, so **user-supplied values are never interpolated into the string**. This makes it inherently safe against SQL injection when used with a `PreparedStatement`.
 
 `LIKE` values are automatically wrapped with `%` on both sides so `whereLike("name", "alice")` becomes `name LIKE ?` with parameter `%alice%`.
-
 
 ## License
 

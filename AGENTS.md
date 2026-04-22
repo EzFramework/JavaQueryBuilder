@@ -51,6 +51,7 @@ Package `com.github.ezframework.javaquerybuilder.query`:
 | `sql.AbstractSqlDialect` | Base SQL rendering logic |
 
 **Key conventions**:
+
 - Builder methods **always return `this`** (or the builder type) for fluent chaining.
 - All SQL values must go through the parameterized SQL path — never concatenate user input into SQL strings.
 - `Operator` is the single source of truth for supported operators; add new operators there first.
@@ -106,6 +107,7 @@ Copilot agents can persist project-scoped notes in `/memories/repo/` to carry co
 The agent will store this under `/memories/repo/` and load it automatically in future sessions.
 
 **Useful things to store**:
+
 - Verified build commands and their quirks
 - Project-specific conventions not obvious from the code
 - Known gotchas (e.g., "always run `mvn checkstyle:check` before committing")
