@@ -100,7 +100,7 @@ SqlResult update = QueryBuilder.update("users")
 ## Documentation
 
 | Page | What it covers |
-|------|----------------|
+| ------ | ---------------- |
 | [Installation](installation) | Maven, Gradle, JitPack, GitHub Packages |
 | [Queries]({{ site.baseurl }}/queries/) | SELECT, INSERT, UPDATE, DELETE, CREATE TABLE builders |
 | [Conditions](conditions) | All 18 operators, `Condition`, `ConditionEntry`, `Connector` |

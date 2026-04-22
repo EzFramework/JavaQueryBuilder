@@ -24,7 +24,7 @@ description: "MySQL dialect — back-tick identifier quoting and DELETE LIMIT su
 Quoting is applied to SELECT and DELETE queries rendered through this dialect.
 
 | Feature | Value |
-|---------|-------|
+| --------- | ------- |
 | Identifier quoting | Back-tick `` ` `` |
 | DELETE LIMIT | Supported |
 | ILIKE | Not supported |

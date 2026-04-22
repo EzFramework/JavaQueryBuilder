@@ -24,7 +24,7 @@ description: "SQLite dialect — double-quote identifier quoting and DELETE LIMI
 supports the `LIMIT` clause on `DELETE` statements.
 
 | Feature | Value |
-|---------|-------|
+| --------- | ------- |
 | Identifier quoting | Double-quote `"` |
 | DELETE LIMIT | Supported |
 | ILIKE | Not supported |

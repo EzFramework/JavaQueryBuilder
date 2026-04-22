@@ -24,7 +24,7 @@ and adds two PostgreSQL-specific features: case-insensitive `ILIKE` / `NOT ILIKE
 operators on SELECT queries, and a `RETURNING` clause on `DELETE` statements.
 
 | Feature | Value |
-|---------|-------|
+| --------- | ------- |
 | Identifier quoting | Double-quote `"` |
 | DELETE LIMIT | Not supported |
 | ILIKE / NOT ILIKE | Supported |

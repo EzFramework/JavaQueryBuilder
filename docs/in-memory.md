@@ -149,7 +149,7 @@ List<String> ids = store.query(q);
 `Condition.matches` evaluates the following operators against an attribute map:
 
 | Operator | In-memory behaviour |
-|----------|---------------------|
+| ---------- | --------------------- |
 | `EQ` | `Objects.equals(stored, value)` |
 | `NEQ` | `!Objects.equals(stored, value)` |
 | `GT` / `GTE` / `LT` / `LTE` | Numeric comparison; coerces `Long`/`Integer`/`Double` as needed |

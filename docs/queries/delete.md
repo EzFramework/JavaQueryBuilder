@@ -133,7 +133,7 @@ SqlResult result = QueryBuilder.deleteFrom("users")
 ## Method reference
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `from(String table)` | `DeleteBuilder` | Set target table |
 | `whereEquals(col, val)` | `DeleteBuilder` | `WHERE col = ?` (AND) |
 | `whereNotEquals(col, val)` | `DeleteBuilder` | `WHERE col != ?` (AND) |

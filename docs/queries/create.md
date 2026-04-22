@@ -55,7 +55,7 @@ constraints.
 ### Fixed-width types
 
 | Constant | SQL | Notes |
-|----------|-----|-------|
+| ---------- | ----- | ------- |
 | `ColumnType.TINYINT` | `TINYINT` | 1-byte integer; MySQL / MariaDB |
 | `ColumnType.SMALLINT` | `SMALLINT` | 2-byte integer |
 | `ColumnType.INT` | `INT` | 4-byte integer |
@@ -86,7 +86,7 @@ constraints.
 ### Parameterised factory methods
 
 | Method | SQL output | Description |
-|--------|-----------|-------------|
+| -------- | ----------- | ------------- |
 | `ColumnType.varChar(n)` | `VARCHAR(n)` | Variable-length string up to `n` chars |
 | `ColumnType.charType(n)` | `CHAR(n)` | Fixed-length string of `n` chars |
 | `ColumnType.decimal(p, s)` | `DECIMAL(p, s)` | Exact decimal with `p` total and `s` fraction digits |
@@ -100,7 +100,7 @@ constraints.
 Modifiers return a new `ColumnType` instance and can be chained in any order:
 
 | Method | Appends | Example |
-|--------|---------|---------|
+| -------- | --------- | --------- |
 | `.notNull()` | `NOT NULL` | `ColumnType.INT.notNull()` → `INT NOT NULL` |
 | `.unique()` | `UNIQUE` | `ColumnType.varChar(64).unique()` → `VARCHAR(64) UNIQUE` |
 | `.autoIncrement()` | `AUTO_INCREMENT` | `ColumnType.INT.notNull().autoIncrement()` → `INT NOT NULL AUTO_INCREMENT` |
@@ -164,13 +164,11 @@ SqlResult result = QueryBuilder.createTable("user_roles")
 ## Method reference
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `table(String name)` | `CreateBuilder` | Set table name |
 | `column(String name, String sqlType)` | `CreateBuilder` | Add a column with a raw SQL type string |
 | `column(String name, ColumnType type)` | `CreateBuilder` | Add a column with a type-safe `ColumnType` |
 | `primaryKey(String name)` | `CreateBuilder` | Declare a primary key column |
 | `ifNotExists()` | `CreateBuilder` | Add `IF NOT EXISTS` guard |
 | `build()` | `SqlResult` | Render; throws `IllegalStateException` if table or columns are missing |
-| `build(SqlDialect dialect)` | `SqlResult` | Render with specified dialect |
-
 | `build(SqlDialect dialect)` | `SqlResult` | Render with specified dialect |

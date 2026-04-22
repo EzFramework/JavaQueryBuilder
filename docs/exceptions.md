@@ -47,7 +47,7 @@ try {
 **Constructors:**
 
 | Constructor | Use case |
-|-------------|----------|
+| ------------- | ---------- |
 | `QueryBuilderException()` | No-message default |
 | `QueryBuilderException(String message)` | Simple message |
 | `QueryBuilderException(String message, Throwable cause)` | Wraps another exception |
@@ -72,7 +72,7 @@ try {
 **Constructors:**
 
 | Constructor | Use case |
-|-------------|----------|
+| ------------- | ---------- |
 | `QueryException()` | No-message default |
 | `QueryException(String message)` | Simple message |
 | `QueryException(String message, Throwable cause)` | Wraps another exception |
@@ -96,7 +96,7 @@ try {
 **Constructors:**
 
 | Constructor | Use case |
-|-------------|----------|
+| ------------- | ---------- |
 | `QueryRenderException()` | No-message default |
 | `QueryRenderException(String message)` | Simple message |
 | `QueryRenderException(String message, Throwable cause)` | Wraps another exception |

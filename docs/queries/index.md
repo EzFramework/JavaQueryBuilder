@@ -18,7 +18,7 @@ dedicated builder objects for DML and DDL statements.
 ## Statement types
 
 | Statement | Builder | Entry point |
-|-----------|---------|-------------|
+| ----------- | --------- | ------------- |
 | [SELECT]({{ site.baseurl }}/queries/select/) | `QueryBuilder` | `new QueryBuilder()` |
 | [INSERT]({{ site.baseurl }}/queries/insert/) | `InsertBuilder` | `QueryBuilder.insertInto(table)` |
 | [UPDATE]({{ site.baseurl }}/queries/update/) | `UpdateBuilder` | `QueryBuilder.update(table)` |
@@ -32,7 +32,7 @@ dedicated builder objects for DML and DDL statements.
 Every builder returns a `SqlResult` from its `build()` or `buildSql()` method:
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `getSql()` | `String` | The rendered SQL with `?` placeholders |
 | `getParameters()` | `List<Object>` | Bind parameters in order of appearance |
 

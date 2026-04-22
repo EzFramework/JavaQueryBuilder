@@ -251,7 +251,7 @@ identifier-quoting differences across database targets.
 `QueryBuilder` also exposes methods for embedding subqueries:
 
 | Method | What it adds |
-|--------|-------------|
+| -------- | ------------- |
 | `whereInSubquery(col, subquery)` | `WHERE col IN (SELECT ...)` |
 | `whereEqualsSubquery(col, subquery)` | `WHERE col = (SELECT ...)` |
 | `whereExistsSubquery(subquery)` | `WHERE EXISTS (SELECT ...)` |

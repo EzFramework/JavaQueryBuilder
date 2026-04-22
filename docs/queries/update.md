@@ -85,7 +85,7 @@ SqlResult result = QueryBuilder.update("users")
 ## Method reference
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `table(String table)` | `UpdateBuilder` | Set target table |
 | `set(String col, Object val)` | `UpdateBuilder` | Add a SET column/value pair |
 | `whereEquals(String col, Object val)` | `UpdateBuilder` | `WHERE col = ?` (AND) |
