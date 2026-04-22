@@ -39,14 +39,35 @@ public class CreateBuilder {
     }
 
     /**
-     * Adds a column definition.
-     * @param name the column name
-     * @param sqlType the SQL type (e.g. "VARCHAR(255)", "INT")
-     * @return this builder
+     * Adds a column definition using a raw SQL type string.
+     *
+     * @param name    the column name
+     * @param sqlType the SQL type string (e.g. {@code "VARCHAR(255)"}, {@code "INT NOT NULL"})
+     * @return this builder instance for chaining
      */
-    public CreateBuilder column(String name, String sqlType) {
+    public CreateBuilder column(final String name, final String sqlType) {
         columns.put(name, sqlType);
         return this;
+    }
+
+    /**
+     * Adds a column definition using a type-safe {@link ColumnType}.
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * QueryBuilder.createTable("users")
+     *     .column("id",       ColumnType.INT.notNull().autoIncrement())
+     *     .column("username", ColumnType.varChar(64).notNull())
+     *     .primaryKey("id")
+     *     .build();
+     * }</pre>
+     *
+     * @param name       the column name
+     * @param columnType the column type; must not be {@code null}
+     * @return this builder instance for chaining
+     */
+    public CreateBuilder column(final String name, final ColumnType columnType) {
+        return column(name, columnType.toSql());
     }
 
     /**
