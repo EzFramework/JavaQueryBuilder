@@ -1,10 +1,12 @@
 ---
-title: Query Builder
-nav_order: 3
+title: SELECT
+parent: Queries
+nav_order: 1
+permalink: /queries/select/
 description: "Building SELECT queries with the fluent QueryBuilder API"
 ---
 
-# Query Builder
+# SELECT
 {: .no_toc }
 
 ## Table of contents
@@ -17,10 +19,9 @@ description: "Building SELECT queries with the fluent QueryBuilder API"
 
 ## Overview
 
-`QueryBuilder` is the main entry point for SELECT queries. Its fluent API lets
-you compose any SELECT statement by chaining method calls and then calling
-`build()` (returns a `Query` object) or `buildSql()` (returns a `SqlResult`
-ready for execution).
+`QueryBuilder` provides a fluent API for composing SELECT statements. Chain
+method calls and finish with `build()` (returns a `Query` object) or
+`buildSql()` (returns a `SqlResult` ready for execution).
 
 ```java
 import com.github.ezframework.javaquerybuilder.query.builder.QueryBuilder;
@@ -39,8 +40,11 @@ String sql     = result.getSql();
 List<?> params = result.getParameters();
 ```
 
-`QueryBuilder` is also the gateway to all DML builders via its static factory
-methods. See [DML Builders](dml-builders).
+For DML statements (INSERT, UPDATE, DELETE, CREATE TABLE) use the static factory
+methods. See [INSERT]({{ site.baseurl }}/queries/insert/),
+[UPDATE]({{ site.baseurl }}/queries/update/),
+[DELETE]({{ site.baseurl }}/queries/delete/), and
+[CREATE TABLE]({{ site.baseurl }}/queries/create/).
 
 ---
 
@@ -55,7 +59,7 @@ new QueryBuilder().from("orders")
 ## Selecting columns
 
 ```java
-// SELECT * (default - no columns specified)
+// SELECT * (default — no columns specified)
 new QueryBuilder().from("users")
 
 // SELECT id, name
@@ -130,6 +134,30 @@ new QueryBuilder()
 
 ---
 
+## ILIKE (PostgreSQL)
+
+For case-insensitive LIKE matching on PostgreSQL, use `whereILike` and
+`orWhereILike`:
+
+```java
+SqlResult result = new QueryBuilder()
+    .from("users")
+    .whereILike("email", "alice")
+    .buildSql(SqlDialect.POSTGRESQL);
+// → SELECT * FROM "users" WHERE "email" ILIKE ?
+// Parameters: ["%alice%"]
+
+// OR variant
+new QueryBuilder()
+    .from("users")
+    .whereEquals("role", "admin")
+    .orWhereILike("name", "bot")
+    .buildSql(SqlDialect.POSTGRESQL);
+// → SELECT * FROM "users" WHERE "role" = ? OR "name" ILIKE ?
+```
+
+---
+
 ## Ordering
 
 ```java
@@ -185,7 +213,7 @@ Pass a raw SQL fragment with no value interpolation. Use static expressions only
 
 ## Building the result
 
-### `build()` (returns a `Query`)
+### `build()` — returns a `Query`
 
 `build()` produces a `Query` object which can be passed to a `SqlDialect` later,
 used for in-memory filtering with `QueryableStorage`, or inspected directly:
@@ -197,13 +225,13 @@ Query q = new QueryBuilder()
     .build();
 ```
 
-### `buildSql()` (returns a `SqlResult`)
+### `buildSql()` — returns a `SqlResult`
 
 `buildSql()` renders the `Query` immediately using the standard ANSI dialect.
 Use the overloads to specify a table or dialect explicitly:
 
 ```java
-// Uses table set via from(), standard dialect
+// Table set via from(), standard dialect
 SqlResult r1 = builder.buildSql();
 
 // Explicit table, standard dialect
@@ -213,8 +241,8 @@ SqlResult r2 = builder.buildSql("orders");
 SqlResult r3 = builder.buildSql("orders", SqlDialect.MYSQL);
 ```
 
-See [SQL Dialects](sql-dialects) for the dialect options and the rendered
-identifier differences.
+See [SQL Dialects]({{ site.baseurl }}/sql-dialects/) for the dialect options and
+identifier-quoting differences across database targets.
 
 ---
 
@@ -232,7 +260,7 @@ identifier differences.
 | `joinSubquery(subquery, alias, on)` | `INNER JOIN (SELECT ...) AS alias ON ...` |
 | `selectSubquery(subquery, alias)` | `(SELECT ...) AS alias` in SELECT clause |
 
-See [Subqueries](subqueries) for full examples.
+See [Subqueries]({{ site.baseurl }}/subqueries/) for full examples.
 
 ---
 

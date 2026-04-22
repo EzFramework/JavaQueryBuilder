@@ -102,11 +102,10 @@ SqlResult update = QueryBuilder.update("users")
 | Page | What it covers |
 |------|----------------|
 | [Installation](installation) | Maven, Gradle, JitPack, GitHub Packages |
-| [Query Builder](query-builder) | SELECT: `from`, `select`, `where*`, `orderBy`, `build` |
-| [DML Builders](dml-builders) | `InsertBuilder`, `UpdateBuilder`, `DeleteBuilder`, `CreateBuilder` |
+| [Queries]({{ site.baseurl }}/queries/) | SELECT, INSERT, UPDATE, DELETE, CREATE TABLE builders |
 | [Conditions](conditions) | All 18 operators, `Condition`, `ConditionEntry`, `Connector` |
 | [Subqueries](subqueries) | All six subquery variants |
-| [SQL Dialects](sql-dialects) | `STANDARD`, `MYSQL`, `SQLITE`, `POSTGRESQL`, `SqlResult`, dialect matrix |
+| [SQL Dialects]({{ site.baseurl }}/sql-dialects/) | `STANDARD`, `MYSQL`, `SQLITE`, `POSTGRESQL`, `SqlResult`, dialect matrix |
 | [Configuration](configuration) | `QueryBuilderDefaults`: global and per-query dialect, columns, limit, LIKE wrapping |
 | [In-Memory Filtering](in-memory) | `QueryableStorage`: filter collections without a database |
 | [Exceptions](exceptions) | Error hierarchy and handling patterns |

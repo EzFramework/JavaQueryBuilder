@@ -1,6 +1,6 @@
 ---
 title: Configuration
-nav_order: 8
+nav_order: 7
 description: "QueryBuilderDefaults: global and per-query preset for dialect, columns, limit, offset, and LIKE wrapping"
 ---
 

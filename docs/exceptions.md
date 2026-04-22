@@ -1,6 +1,6 @@
 ---
 title: Exceptions
-nav_order: 10
+nav_order: 9
 description: "Exception hierarchy, when each exception is thrown, and handling patterns"
 ---
 

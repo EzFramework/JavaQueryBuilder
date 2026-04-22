@@ -1,6 +1,6 @@
 ---
 title: Conditions
-nav_order: 5
+nav_order: 4
 description: "Operators, Condition, ConditionEntry, Connector AND/OR, and the orWhere* pattern"
 ---
 

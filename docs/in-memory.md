@@ -1,6 +1,6 @@
 ---
 title: In-Memory Filtering
-nav_order: 9
+nav_order: 8
 description: "Filtering in-memory collections with QueryableStorage"
 ---
 
