@@ -46,7 +46,7 @@ your classpath.
 <dependency>
   <groupId>com.github.EzFramework</groupId>
   <artifactId>JavaQueryBuilder</artifactId>
-  <version>1.0.4</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 
@@ -66,7 +66,7 @@ repositories {
 
 ```kotlin
 dependencies {
-    implementation("com.github.EzFramework:JavaQueryBuilder:1.0.4")
+    implementation("com.github.EzFramework:JavaQueryBuilder:1.1.0")
 }
 ```
 
@@ -102,7 +102,7 @@ authenticate with a personal access token that has `read:packages` scope.
 <dependency>
   <groupId>com.github.EzFramework</groupId>
   <artifactId>java-query-builder</artifactId>
-  <version>1.0.4</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 

@@ -1,6 +1,6 @@
 ---
 title: Conditions
-nav_order: 5
+nav_order: 4
 description: "Operators, Condition, ConditionEntry, Connector AND/OR, and the orWhere* pattern"
 ---
 
@@ -50,6 +50,8 @@ conditions use `AND` by default; call the `orWhere*` variant to use `OR`.
 | `BETWEEN` | `col BETWEEN ? AND ?` | Inclusive range; value is a two-element `List<?>` |
 | `EXISTS_SUBQUERY` | `EXISTS (SELECT ...)` | Value is a `Query`; column is `null` |
 | `NOT_EXISTS_SUBQUERY` | `NOT EXISTS (SELECT ...)` | Value is a `Query`; column is `null` |
+| `ILIKE` | `col ILIKE ?` | Case-insensitive substring match — **PostgreSQL only** |
+| `NOT_ILIKE` | `col NOT ILIKE ?` | Negated case-insensitive match — **PostgreSQL only** |
 
 ---
 
@@ -69,6 +71,8 @@ constant and the SQL it generates.
 | `whereLessThanOrEquals(col, val)` | `LTE` | `col <= ?` |
 | `whereLike(col, val)` | `LIKE` | `col LIKE ?` |
 | `whereNotLike(col, val)` | `NOT_LIKE` | `col NOT LIKE ?` |
+| `whereILike(col, val)` | `ILIKE` | `col ILIKE ?` (PostgreSQL only) |
+| `orWhereILike(col, val)` | `ILIKE` | `OR col ILIKE ?` (PostgreSQL only) |
 | `whereNull(col)` | `IS_NULL` | `col IS NULL` |
 | `whereNotNull(col)` | `IS_NOT_NULL` | `col IS NOT NULL` |
 | `whereExists(col)` | `EXISTS` | `col IS NOT NULL` |

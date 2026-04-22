@@ -1,6 +1,6 @@
 ---
 title: API Reference
-nav_order: 11
+nav_order: 10
 description: "Complete public method tables for every class and interface in JavaQueryBuilder"
 ---
 
