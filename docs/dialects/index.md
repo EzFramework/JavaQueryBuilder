@@ -24,7 +24,7 @@ parameterized `SqlResult`. Four built-in dialects are provided as constants
 on the interface:
 
 | Constant | Page | Identifier quoting | DELETE LIMIT | ILIKE | RETURNING |
-|----------|------|--------------------|--------------|-------|-----------|
+| ---------- | ------ | -------------------- | -------------- | ------- | ----------- |
 | `SqlDialect.STANDARD` | [STANDARD]({{ site.baseurl }}/sql-dialects/standard/) | None (ANSI) | No | No | No |
 | `SqlDialect.MYSQL` | [MySQL]({{ site.baseurl }}/sql-dialects/mysql/) | Back-tick `` ` `` | Yes | No | No |
 | `SqlDialect.SQLITE` | [SQLite]({{ site.baseurl }}/sql-dialects/sqlite/) | Double-quote `"` | Yes | No | No |
@@ -38,7 +38,7 @@ The same `Query` produces different SQL across dialects due to identifier
 quoting:
 
 | Feature | STANDARD | MYSQL | SQLITE | POSTGRESQL |
-|---------|----------|-------|--------|------------|
+| --------- | ---------- | ------- | -------- | ------------ |
 | Table quoting | `users` | `` `users` `` | `"users"` | `"users"` |
 | Column quoting | `id` | `` `id` `` | `"id"` | `"id"` |
 | DELETE LIMIT | No | Yes | Yes | No |
@@ -54,7 +54,7 @@ quoting:
 rendered SQL string and the ordered bind-parameter list.
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `getSql()` | `String` | The rendered SQL with `?` placeholders |
 | `getParameters()` | `List<Object>` | Bind parameters in the order they appear in the SQL |
 
@@ -97,7 +97,7 @@ and `appendConditionFragment`.
 ## SqlDialect interface
 
 | Member | Description |
-|--------|-------------|
+| -------- | ------------- |
 | `SqlDialect.STANDARD` | ANSI SQL constant instance |
 | `SqlDialect.MYSQL` | MySQL dialect constant instance |
 | `SqlDialect.SQLITE` | SQLite dialect constant instance |

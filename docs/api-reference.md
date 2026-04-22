@@ -24,7 +24,7 @@ Main entry point for SELECT queries and static gateway to DML builders.
 **Static factory methods**
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `insert()` | `InsertBuilder` | New `InsertBuilder` |
 | `insertInto(String table)` | `InsertBuilder` | New `InsertBuilder` pre-set to `table` |
 | `update()` | `UpdateBuilder` | New `UpdateBuilder` |
@@ -37,7 +37,7 @@ Main entry point for SELECT queries and static gateway to DML builders.
 **SELECT builder methods**
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `from(String table)` | `QueryBuilder` | Set source table |
 | `select(String... columns)` | `QueryBuilder` | Add columns to SELECT clause; omit for `SELECT *` |
 | `distinct()` | `QueryBuilder` | Add `DISTINCT` to SELECT |
@@ -82,7 +82,7 @@ Main entry point for SELECT queries and static gateway to DML builders.
 Lower-level SELECT builder that produces `SqlResult` directly (no `Query` intermediary).
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `from(String table)` | `SelectBuilder` | Set source table |
 | `select(String... columns)` | `SelectBuilder` | Add SELECT columns |
 | `distinct()` | `SelectBuilder` | Add `DISTINCT` |
@@ -102,7 +102,7 @@ Lower-level SELECT builder that produces `SqlResult` directly (no `Query` interm
 ### `InsertBuilder`
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `into(String table)` | `InsertBuilder` | Set target table |
 | `value(String col, Object val)` | `InsertBuilder` | Add a column/value pair |
 | `build()` | `SqlResult` | Render with standard dialect |
@@ -113,7 +113,7 @@ Lower-level SELECT builder that produces `SqlResult` directly (no `Query` interm
 ### `UpdateBuilder`
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `table(String table)` | `UpdateBuilder` | Set target table |
 | `set(String col, Object val)` | `UpdateBuilder` | Add a SET pair |
 | `whereEquals(col, val)` | `UpdateBuilder` | `WHERE col = ?` (AND) |
@@ -127,7 +127,7 @@ Lower-level SELECT builder that produces `SqlResult` directly (no `Query` interm
 ### `DeleteBuilder`
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `from(String table)` | `DeleteBuilder` | Set target table |
 | `whereEquals(col, val)` | `DeleteBuilder` | `WHERE col = ?` (AND) |
 | `whereNotEquals(col, val)` | `DeleteBuilder` | `WHERE col != ?` (AND) |
@@ -147,7 +147,7 @@ Lower-level SELECT builder that produces `SqlResult` directly (no `Query` interm
 ### `CreateBuilder`
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `table(String name)` | `CreateBuilder` | Set table name |
 | `column(String name, String sqlType)` | `CreateBuilder` | Add column definition |
 | `primaryKey(String name)` | `CreateBuilder` | Declare a primary key column |
@@ -164,7 +164,7 @@ Lower-level SELECT builder that produces `SqlResult` directly (no `Query` interm
 Enum of comparison operators. See [Conditions](conditions) for the full table.
 
 | Constant | SQL |
-|----------|-----|
+| ---------- | ----- |
 | `EQ` | `= ?` |
 | `NEQ` | `!= ?` |
 | `GT` | `> ?` |
@@ -187,7 +187,7 @@ Enum of comparison operators. See [Conditions](conditions) for the full table.
 ### `Condition`
 
 | Member | Description |
-|--------|-------------|
+| -------- | ------------- |
 | `Condition(Operator op, Object value)` | Create a condition; `value` may be `null` |
 | `getOperator()` | Returns the `Operator` |
 | `getValue()` | Returns the comparison value (`null`, scalar, `List<?>`, or `Query`) |
@@ -198,7 +198,7 @@ Enum of comparison operators. See [Conditions](conditions) for the full table.
 ### `ConditionEntry`
 
 | Member | Description |
-|--------|-------------|
+| -------- | ------------- |
 | `ConditionEntry(String col, Condition cond, Connector connector)` | Create a condition entry |
 | `getColumn()` | Column name (`null` for EXISTS-subquery conditions) |
 | `getCondition()` | The wrapped `Condition` |
@@ -209,7 +209,7 @@ Enum of comparison operators. See [Conditions](conditions) for the full table.
 ### `Connector`
 
 | Constant | SQL keyword |
-|----------|-------------|
+| ---------- | ------------- |
 | `AND` | `AND` |
 | `OR` | `OR` |
 
@@ -223,7 +223,7 @@ Immutable data holder produced by `QueryBuilder.build()`. All fields have
 getters and setters; setters are used exclusively by the builders.
 
 | Getter | Type | Description |
-|--------|------|-------------|
+| -------- | ------ | ------------- |
 | `getTable()` | `String` | Source table name |
 | `getSelectColumns()` | `List<String>` | Columns in SELECT clause; empty = `SELECT *` |
 | `isDistinct()` | `boolean` | Whether `DISTINCT` is active |
@@ -244,7 +244,7 @@ getters and setters; setters are used exclusively by the builders.
 ### `JoinClause`
 
 | Member | Description |
-|--------|-------------|
+| -------- | ------------- |
 | `JoinClause(Type, String table, String on)` | Plain-table join |
 | `JoinClause(Type, Query subquery, String alias, String on)` | Subquery (derived-table) join |
 | `getType()` | `JoinClause.Type`: `INNER`, `LEFT`, `RIGHT`, or `CROSS` |
@@ -258,7 +258,7 @@ getters and setters; setters are used exclusively by the builders.
 ### `ScalarSelectItem`
 
 | Member | Description |
-|--------|-------------|
+| -------- | ------------- |
 | `ScalarSelectItem(Query subquery, String alias)` | Create a scalar SELECT item |
 | `getSubquery()` | The subquery to embed |
 | `getAlias()` | Column alias in SELECT clause |
@@ -283,7 +283,7 @@ public interface QueryableStorage {
 ### `SqlDialect`
 
 | Member | Description |
-|--------|-------------|
+| -------- | ------------- |
 | `STANDARD` | ANSI SQL (no identifier quoting) |
 | `MYSQL` | MySQL: back-tick quoting; DELETE LIMIT supported |
 | `SQLITE` | SQLite: double-quote quoting; DELETE LIMIT supported |
@@ -295,7 +295,7 @@ public interface QueryableStorage {
 ### `SqlResult`
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `getSql()` | `String` | Rendered SQL with `?` placeholders |
 | `getParameters()` | `List<Object>` | Bind parameters in placeholder order |
 
@@ -311,7 +311,7 @@ usage guide.
 **Static methods**
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `global()` | `QueryBuilderDefaults` | Current JVM-wide defaults instance |
 | `setGlobal(defaults)` | `void` | Replace the JVM-wide defaults; throws `NullPointerException` if `null` |
 | `builder()` | `Builder` | New builder pre-filled with canonical defaults |
@@ -320,7 +320,7 @@ usage guide.
 **Instance getters**
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `getDialect()` | `SqlDialect` | Configured SQL dialect |
 | `getDefaultColumns()` | `String` | Default SELECT column expression |
 | `getDefaultLimit()` | `int` | Default LIMIT; `-1` means none |
@@ -333,7 +333,7 @@ usage guide.
 ### `QueryBuilderDefaults.Builder`
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `dialect(SqlDialect)` | `Builder` | Set dialect; throws `NullPointerException` if `null` |
 | `defaultColumns(String)` | `Builder` | Set default SELECT columns; throws `NullPointerException` if `null` |
 | `defaultLimit(int)` | `Builder` | Set default LIMIT; pass `-1` to disable |
@@ -349,7 +349,7 @@ usage guide.
 ### `QueryBuilderException`
 
 | Constructor | Description |
-|-------------|-------------|
+| ------------- | ------------- |
 | `QueryBuilderException()` | No-message default |
 | `QueryBuilderException(String message)` | Simple message |
 | `QueryBuilderException(String message, Throwable cause)` | Wraps another exception |
@@ -360,7 +360,7 @@ usage guide.
 ### `QueryException`
 
 | Constructor | Description |
-|-------------|-------------|
+| ------------- | ------------- |
 | `QueryException()` | No-message default |
 | `QueryException(String message)` | Simple message |
 | `QueryException(String message, Throwable cause)` | Wraps another exception |
@@ -371,7 +371,7 @@ usage guide.
 ### `QueryRenderException`
 
 | Constructor | Description |
-|-------------|-------------|
+| ------------- | ------------- |
 | `QueryRenderException()` | No-message default |
 | `QueryRenderException(String message)` | Simple message |
 | `QueryRenderException(String message, Throwable cause)` | Wraps another exception |

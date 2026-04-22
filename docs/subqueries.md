@@ -22,7 +22,7 @@ statement. Every subquery is represented as a `Query` object built by a nested
 `QueryBuilder` call.
 
 | Method | SQL produced |
-|--------|-------------|
+| -------- | ------------- |
 | `whereInSubquery(col, sub)` | `WHERE col IN (SELECT ...)` |
 | `whereEqualsSubquery(col, sub)` | `WHERE col = (SELECT ...)` |
 | `whereExistsSubquery(sub)` | `WHERE EXISTS (SELECT ...)` |

@@ -28,7 +28,7 @@ defaults for a single builder instance using `.withDefaults()`.
 **Configurable settings:**
 
 | Setting | Default | Description |
-|---------|---------|-------------|
+| --------- | --------- | ------------- |
 | `dialect` | `SqlDialect.STANDARD` | SQL dialect used for identifier quoting |
 | `defaultColumns` | `"*"` | Column expression used in `SELECT` when none are specified |
 | `defaultLimit` | `-1` (no limit) | `LIMIT` applied when the builder has no `.limit()` call |
@@ -165,7 +165,7 @@ QueryBuilderDefaults.setGlobal(QueryBuilderDefaults.builder().build());
 ### `QueryBuilderDefaults` (static methods)
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `global()` | `QueryBuilderDefaults` | The current JVM-wide defaults instance |
 | `setGlobal(defaults)` | `void` | Replace the JVM-wide defaults; throws `NullPointerException` if `null` |
 | `builder()` | `Builder` | New builder pre-filled with canonical defaults |
@@ -174,7 +174,7 @@ QueryBuilderDefaults.setGlobal(QueryBuilderDefaults.builder().build());
 ### `QueryBuilderDefaults` (instance getters)
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `getDialect()` | `SqlDialect` | The configured SQL dialect |
 | `getDefaultColumns()` | `String` | Default SELECT column expression |
 | `getDefaultLimit()` | `int` | Default LIMIT value; `-1` means none |
@@ -185,7 +185,7 @@ QueryBuilderDefaults.setGlobal(QueryBuilderDefaults.builder().build());
 ### `QueryBuilderDefaults.Builder`
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `dialect(SqlDialect)` | `Builder` | Set dialect; throws `NullPointerException` if `null` |
 | `defaultColumns(String)` | `Builder` | Set default SELECT columns; throws `NullPointerException` if `null` |
 | `defaultLimit(int)` | `Builder` | Set default LIMIT; pass `-1` to disable |
@@ -199,7 +199,7 @@ QueryBuilderDefaults.setGlobal(QueryBuilderDefaults.builder().build());
 All three builders throw `NullPointerException` if `null` is passed.
 
 | Builder | Method signature |
-|---------|-----------------|
+| --------- | ----------------- |
 | `QueryBuilder` | `withDefaults(QueryBuilderDefaults defaults)` |
 | `SelectBuilder` | `withDefaults(QueryBuilderDefaults defaults)` |
 | `DeleteBuilder` | `withDefaults(QueryBuilderDefaults defaults)` |

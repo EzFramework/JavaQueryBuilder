@@ -24,7 +24,7 @@ It is the default dialect used by `buildSql()` and `build()` when no dialect
 is specified.
 
 | Feature | Value |
-|---------|-------|
+| --------- | ------- |
 | Identifier quoting | None |
 | DELETE LIMIT | Not supported |
 | ILIKE | Not supported |

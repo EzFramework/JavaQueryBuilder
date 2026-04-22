@@ -74,7 +74,7 @@ SqlResult result = QueryBuilder.insertInto("users")
 ## Method reference
 
 | Method | Returns | Description |
-|--------|---------|-------------|
+| -------- | --------- | ------------- |
 | `into(String table)` | `InsertBuilder` | Set target table (also available via factory) |
 | `value(String col, Object val)` | `InsertBuilder` | Add a column/value pair |
 | `returning(String... cols)` | `InsertBuilder` | Append `RETURNING col1, col2, ...` (PostgreSQL only) |

@@ -33,7 +33,7 @@ conditions use `AND` by default; call the `orWhere*` variant to use `OR`.
 `Operator` is the single source of truth for all supported comparison operators.
 
 | Constant | SQL rendering | Notes |
-|----------|---------------|-------|
+| ---------- | --------------- | ------- |
 | `EQ` | `col = ?` | Equality |
 | `NEQ` | `col != ?` | Not equal |
 | `GT` | `col > ?` | Greater than |
@@ -61,7 +61,7 @@ The table below maps every `QueryBuilder` `where*` method to its `Operator`
 constant and the SQL it generates.
 
 | Builder method | Operator | Generated SQL fragment |
-|----------------|----------|------------------------|
+| ---------------- | ---------- | ------------------------ |
 | `whereEquals(col, val)` | `EQ` | `col = ?` |
 | `orWhereEquals(col, val)` | `EQ` | `OR col = ?` |
 | `whereNotEquals(col, val)` | `NEQ` | `col != ?` |
@@ -131,7 +131,7 @@ new QueryBuilder()
 `Condition` pairs an `Operator` with its comparison value.
 
 | Member | Type | Description |
-|--------|------|-------------|
+| -------- | ------ | ------------- |
 | `Condition(Operator op, Object value)` | constructor | Create a condition; `value` may be `null` for `IS_NULL`, `IS_NOT_NULL`, `EXISTS` |
 | `getOperator()` | `Operator` | The operator for this condition |
 | `getValue()` | `Object` | The comparison value (`null`, scalar, `List<?>`, or `Query`) |
@@ -147,7 +147,7 @@ without a database.
 `ConditionEntry` wraps a `Condition` with its column name and `Connector`.
 
 | Member | Type | Description |
-|--------|------|-------------|
+| -------- | ------ | ------------- |
 | `ConditionEntry(String column, Condition condition, Connector connector)` | constructor | Create a condition entry |
 | `getColumn()` | `String` | The column name (`null` for `EXISTS_SUBQUERY` / `NOT_EXISTS_SUBQUERY`) |
 | `getCondition()` | `Condition` | The wrapped condition |
@@ -158,6 +158,6 @@ without a database.
 ## Connector enum
 
 | Constant | SQL keyword |
-|----------|-------------|
+| ---------- | ------------- |
 | `AND` | `AND` |
 | `OR` | `OR` |

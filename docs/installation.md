@@ -18,7 +18,7 @@ description: "Add JavaQueryBuilder to your Java project via JitPack or GitHub Pa
 ## Requirements
 
 | Requirement | Minimum version |
-|-------------|----------------|
+| ------------- | ---------------- |
 | Java | **25** |
 | Build tool | Maven **3.8+** or Gradle **8+** |
 
