@@ -2,13 +2,14 @@ package com.github.ezframework.javaquerybuilder.query.sql;
 
 import com.github.ezframework.javaquerybuilder.query.Query;
 import com.github.ezframework.javaquerybuilder.query.sql.mysql.MySqlDialect;
+import com.github.ezframework.javaquerybuilder.query.sql.postgresql.PostgreSqlDialect;
 import com.github.ezframework.javaquerybuilder.query.sql.sqlite.SqliteDialect;
 
 /**
  * Strategy for rendering a {@link Query} to a SQL string.
  *
  * <p>Use the built-in constants for the most common dialects:
- * {@link #STANDARD}, {@link #MYSQL}, or {@link #SQLITE}.
+ * {@link #STANDARD}, {@link #MYSQL}, {@link #SQLITE}, or {@link #POSTGRESQL}.
  * For custom behaviour, extend {@link AbstractSqlDialect} and override
  * {@link AbstractSqlDialect#quoteIdentifier(String)}.
  *
@@ -25,6 +26,13 @@ public interface SqlDialect {
 
     /** SQLite dialect — identifiers are wrapped in double-quote characters. */
     SqlDialect SQLITE = new SqliteDialect();
+
+    /**
+     * PostgreSQL dialect — identifiers are wrapped in double-quote characters,
+     * with additional support for {@code ILIKE}/{@code NOT ILIKE} operators and
+     * {@code RETURNING} clauses on DELETE statements.
+     */
+    SqlDialect POSTGRESQL = new PostgreSqlDialect();
 
     /**
      * Renders the given query to a parameterized {@link SqlResult}.

@@ -44,5 +44,21 @@ public enum Operator {
      * True SQL {@code NOT EXISTS (SELECT ...)} — value must be a
      * {@link com.github.ezframework.javaquerybuilder.query.Query}.
      */
-    NOT_EXISTS_SUBQUERY
+    NOT_EXISTS_SUBQUERY,
+    /**
+     * PostgreSQL case-insensitive {@code ILIKE} substring match.
+     *
+     * <p>Only rendered correctly by
+     * {@link com.github.ezframework.javaquerybuilder.query.sql.postgresql.PostgreSqlDialect};
+     * using this operator with any other dialect produces no output.
+     */
+    ILIKE,
+    /**
+     * PostgreSQL case-insensitive {@code NOT ILIKE} substring match.
+     *
+     * <p>Only rendered correctly by
+     * {@link com.github.ezframework.javaquerybuilder.query.sql.postgresql.PostgreSqlDialect};
+     * using this operator with any other dialect produces no output.
+     */
+    NOT_ILIKE
 }

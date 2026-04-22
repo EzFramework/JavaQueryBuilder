@@ -26,6 +26,9 @@ public class DeleteBuilder {
     /** The WHERE conditions. */
     private final List<ConditionEntry> conditions = new ArrayList<>();
 
+    /** The RETURNING columns (PostgreSQL only). */
+    private final List<String> returningColumns = new ArrayList<>();
+
     /** The defaults configuration for this builder instance. */
     private QueryBuilderDefaults queryBuilderDefaults = QueryBuilderDefaults.global();
 
@@ -191,6 +194,20 @@ public class DeleteBuilder {
     }
 
     /**
+     * Specifies the columns to include in a {@code RETURNING} clause (PostgreSQL only).
+     *
+     * <p>This is only rendered when the active dialect supports {@code RETURNING}
+     * (i.e., {@link com.github.ezframework.javaquerybuilder.query.sql.SqlDialect#POSTGRESQL}).
+     *
+     * @param columns one or more column names; must not be {@code null} or empty
+     * @return this builder instance for chaining
+     */
+    public DeleteBuilder returning(final String... columns) {
+        returningColumns.addAll(java.util.Arrays.asList(columns));
+        return this;
+    }
+
+    /**
      * Builds the SQL DELETE statement using standard SQL.
      *
      * @return the SQL result
@@ -217,6 +234,7 @@ public class DeleteBuilder {
         q.setTable(table);
         q.setConditions(new ArrayList<>(conditions));
         q.setLimit(-1);
+        q.setReturningColumns(new ArrayList<>(returningColumns));
         return q;
     }
 }

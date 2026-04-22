@@ -29,6 +29,9 @@ public class UpdateBuilder {
     /** The WHERE conditions. */
     private final List<ConditionEntry> conditions = new ArrayList<>();
 
+    /** The RETURNING columns (PostgreSQL only). */
+    private final List<String> returningColumns = new ArrayList<>();
+
     /**
      * Sets the table to update.
      * @param table the table name
@@ -86,6 +89,20 @@ public class UpdateBuilder {
     }
 
     /**
+     * Specifies the columns to include in a {@code RETURNING} clause (PostgreSQL only).
+     *
+     * <p>The {@code RETURNING} clause is appended unconditionally to the SQL string;
+     * it is the caller's responsibility to use a PostgreSQL connection.
+     *
+     * @param columns one or more column names; must not be {@code null} or empty
+     * @return this builder instance for chaining
+     */
+    public UpdateBuilder returning(final String... columns) {
+        returningColumns.addAll(java.util.Arrays.asList(columns));
+        return this;
+    }
+
+    /**
      * Builds the SQL UPDATE statement.
      * @return the SQL result
      */
@@ -122,6 +139,9 @@ public class UpdateBuilder {
                 sql.append(cond.getColumn()).append(" = ?");
                 params.add(cond.getCondition().getValue());
             }
+        }
+        if (!returningColumns.isEmpty()) {
+            sql.append(" RETURNING ").append(String.join(", ", returningColumns));
         }
 
         return new SqlResult() {
